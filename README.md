@@ -1,340 +1,325 @@
-# Microsoft 365 PowerShell Module Setup Script
+# Microsoft 365 PowerShell Module Installer - Service-Based Architecture
 
-[![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue.svg)](https://github.com/PowerShell/PowerShell)
-[![License](https://img.shields.io/badge/License-Apache%202.0%20with%20Commons%20Clause-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows/)
+## Overview
 
-**An intelligent, automated PowerShell script that sets up a comprehensive Microsoft 365 administration environment with zero configuration required.**
+This installer uses a scalable, service-based organization that mirrors how Microsoft 365 services are actually structured. Instead of arbitrary categories, modules are organized by the services they manage, making it intuitive and future-proof.
 
-## 🚀 **Key Features**
+## Scalable Architecture Benefits
 
-- **🤖 Fully Automated** - Zero prompts or manual intervention required by default
-- **⚡ PowerShell 7 Auto-Upgrade** - Automatically detects, installs, and switches to PowerShell 7 for optimal performance
-- **🧠 Intelligent Compatibility** - Automatically adapts to PowerShell 5.1 limitations when needed
-- **📊 Clear Progress Tracking** - Real-time progress indicators with batch summaries
-- **🛡️ Function Capacity Management** - Prevents PowerShell 5.1 function limit issues (4096 limit)
-- **🔧 Repository Trust Automation** - Automatically configures PowerShell Gallery as trusted
-- **📋 Educational Interface** - Shows available options and current settings on every run
-- **🎯 Comprehensive Coverage** - Installs all essential Microsoft 365 PowerShell modules
+### Service-Based Organization
+Modules are grouped by the Microsoft 365 service they manage:
+- **Authentication** - Core authentication modules
+- **Identity** - User and directory management  
+- **Exchange** - Email and calendar administration
+- **Teams** - Microsoft Teams management
+- **SharePoint** - SharePoint Online administration
+- **Security** - Security alerts and compliance
+- **Reporting** - Analytics and data visualization
+- **Power Platform** - Power Apps, Automate, BI
+- **Azure** - Azure service integration
+- **Development** - Development and automation tools
 
-## 📦 **Modules Installed**
+### Priority-Based Installation
+Services install in logical order based on dependencies:
+1. Authentication (required first)
+2. Identity (users/groups)
+3. Core services (Exchange, Teams, SharePoint)
+4. Specialized services (Security, Power Platform)
 
-### **Essential Modules (Always Installed)**
-- **Microsoft Graph SDK**
-  - `Microsoft.Graph.Authentication` - Core authentication
-  - `Microsoft.Graph.Users` - User management
-  - `Microsoft.Graph.Groups` - Group operations
-  - `Microsoft.Graph.Identity.SignIns` - Sign-in logs and authentication
-  - `Microsoft.Graph.Identity.DirectoryManagement` - Directory operations
-  - `Microsoft.Graph.Reports` - Usage and activity reports
-  - `Microsoft.Graph.Security` - Security operations
+### Predefined Profiles
+Common combinations for different admin roles:
 
-- **Service-Specific Modules**
-  - `ExchangeOnlineManagement` - Exchange Online & Security/Compliance
-  - `MicrosoftTeams` - Teams administration
-  - `SharePointPnPPowerShellOnline` - SharePoint Online (PowerShell 5.1 compatible)
-  - `PnP.PowerShell` - Modern SharePoint Online (PowerShell 7+)
+| Profile | Services Included | Use Case |
+|---------|------------------|----------|
+| `basic` | Authentication, Identity, Exchange, Teams, SharePoint, Reporting | Day-to-day M365 admin |
+| `security` | Basic + Security/Compliance | Security administrator |
+| `power` | Authentication, Identity, Power Platform, Reporting | Power Platform admin |
+| `developer` | Basic + Development tools | Script development |
+| `enterprise` | All services | Full enterprise admin |
 
-- **Productivity & Reporting**
-  - `ImportExcel` - Excel file operations without Office
-  - `PSWriteWord` - Word document creation without Office
+## Quick Start
 
-### **Optional Modules (PowerShell 7+ with `-IncludeOptionalModules`)**
-- `Microsoft.Graph.Sites` - SharePoint sites via Graph API
-- `Microsoft.Graph.Teams` - Teams via Graph API
-- `Microsoft.Graph.Files` - OneDrive and SharePoint files
-- `Microsoft.Graph.DeviceManagement` - Intune device management
-- `Microsoft.Graph.Compliance` - Purview compliance features
-
-## 🎯 **Quick Start**
-
-### **Default Installation (Recommended)**
+### Interactive Menu (Recommended for New Users)
 ```powershell
-.\Install-PowerShell-Modules-Automated.ps1
+.\Install-Modules-Simple.ps1
 ```
-**What happens:**
-- ✅ Detects your PowerShell version
-- ✅ Auto-installs PowerShell 7 if missing
-- ✅ Restarts script in PowerShell 7 for optimal performance
-- ✅ Installs all essential modules without prompts
-- ✅ Provides clear progress tracking
+When run without parameters, the script displays an interactive menu:
+```
+================================================================================
+   MICROSOFT 365 POWERSHELL MODULE INSTALLER
+            Select Installation Profile
+================================================================================
 
-### **With Progress Monitoring**
+  [1] Basic Administrator
+      Essential modules for day-to-day Microsoft 365 administration
+      Services: 6 (authentication, identity, exchange, teams, sharepoint, reporting)
+      Modules: ~10 modules will be installed
+
+  [2] Security Administrator  
+      Core modules plus security and compliance tools
+      Services: 7 (authentication, identity, exchange, teams, sharepoint, security, reporting)
+      Modules: ~13 modules will be installed
+
+  [3] Power Platform Administrator
+      Core modules plus Power Platform administration
+      Services: 4 (authentication, identity, powerplatform, reporting)
+      Modules: ~8 modules will be installed
+
+  [4] Developer/Automation
+      Core modules plus development and automation tools
+      Services: 7 (authentication, identity, exchange, teams, sharepoint, development, reporting)
+      Modules: ~13 modules will be installed
+
+  [5] Enterprise Administrator
+      All modules for comprehensive Microsoft 365 and Azure management
+      Services: 10 (all services)
+      Modules: ~25 modules will be installed
+
+  [6] Custom Configuration
+      Use your customized JSON configuration settings
+      Services: Based on 'enabled' settings in modules-config.json
+
+  [7] Exit
+      Cancel installation and exit
+
+Select an option [1-7]:
+```
+
+### Direct Profile Usage (Advanced Users)
 ```powershell
-.\Install-PowerShell-Modules-Automated.ps1 -PauseBetweenBatches
-```
-**Perfect for:**
-- Watching installation progress
-- Reviewing results between batches
-- Learning what's being installed
+# Basic Microsoft 365 administration
+.\Install-Modules-Simple.ps1 -Profile basic
 
-### **Complete Installation**
+# Security administrator
+.\Install-Modules-Simple.ps1 -Profile security
+
+# Power Platform administrator  
+.\Install-Modules-Simple.ps1 -Profile power
+
+# Full enterprise setup
+.\Install-Modules-Simple.ps1 -Profile enterprise
+```
+
+### Custom Service Selection
 ```powershell
-.\Install-PowerShell-Modules-Automated.ps1 -IncludeOptionalModules
-```
-**Includes:**
-- All essential modules
-- Large Graph modules (Sites, Teams, Files, etc.)
-- Best with PowerShell 7 for no function limits
+# Only authentication and identity
+.\Install-Modules-Simple.ps1 -EnableServices "authentication,identity"
 
-## 📋 **All Available Options**
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `-Automated` | Fully automated installation without prompts | `True` |
-| `-Interactive` | Enable prompts and user guidance | `False` |
-| `-Force` | Force reinstall of existing modules | `False` |
-| `-SkipVersionCheck` | Install any available version (faster) | `False` |
-| `-Scope` | Installation scope (`CurrentUser`, `AllUsers`) | `CurrentUser` |
-| `-IncludeOptionalModules` | Add large Graph modules | `False` |
-| `-PowerShell5Compatible` | Force PowerShell 5.1 mode (skip PS7 upgrade) | `False` |
-| `-PauseBetweenBatches` | Pause after each batch for review | `False` |
-| `-ShowDetailedProgress` | Enhanced progress information | `False` |
-
-### **Example Commands**
-
-```powershell
-# Default: Automated with PowerShell 7 upgrade
-.\Install-PowerShell-Modules-Automated.ps1
-
-# Monitoring-friendly with pauses
-.\Install-PowerShell-Modules-Automated.ps1 -PauseBetweenBatches
-
-# Interactive mode with forced reinstall
-.\Install-PowerShell-Modules-Automated.ps1 -Interactive -Force
-
-# Complete installation with all modules
-.\Install-PowerShell-Modules-Automated.ps1 -IncludeOptionalModules -Force
-
-# System-wide installation (requires admin)
-.\Install-PowerShell-Modules-Automated.ps1 -Scope AllUsers
-
-# PowerShell 5.1 compatibility mode
-.\Install-PowerShell-Modules-Automated.ps1 -PowerShell5Compatible
+# Exchange and Teams only
+.\Install-Modules-Simple.ps1 -EnableServices "authentication,exchange,teams"
 ```
 
-## 🔧 **PowerShell Version Compatibility**
+## Service Details
 
-### **PowerShell 7+ (Recommended)**
-- ✅ **Function Limit**: 65,000+ (virtually unlimited)
-- ✅ **All modules supported**: Including modern PnP.PowerShell
-- ✅ **Better performance**: Faster loading and execution
-- ✅ **Cross-platform**: Windows, Linux, macOS
+### 🔐 Authentication & Core
+**Essential for all Microsoft 365 operations**
+- Microsoft.Graph.Authentication (required)
+- MSAL.PS (advanced authentication scenarios)
 
-### **PowerShell 5.1 (Automatically Handled)**
-- ⚠️ **Function Limit**: 4,096 (restrictive)
-- ✅ **Compatibility mode**: Uses legacy-compatible modules
-- ✅ **Smart module selection**: Excludes large Graph modules
-- ✅ **Auto-upgrade option**: Script offers PowerShell 7 installation
+### 👥 Identity & Directory Management  
+**User, group, and directory administration**
+- Microsoft.Graph.Users (user management)
+- Microsoft.Graph.Groups (group management)
+- Microsoft.Graph.Identity.DirectoryManagement (directory roles)
+- Microsoft.Graph.Applications (app registrations)
 
-## 📊 **Installation Process**
+### 📧 Exchange Online
+**Email, calendar, and Exchange administration**
+- ExchangeOnlineManagement (complete Exchange management)
 
-### **Automatic PowerShell 7 Upgrade Flow**
-```
-PowerShell 5.1 Detected
-    ↓
-Check for PowerShell 7
-    ↓
-Auto-install PowerShell 7 (winget/MSI)
-    ↓
-Restart script in PowerShell 7
-    ↓
-Install all modules optimally
-```
+### 💬 Microsoft Teams
+**Teams administration and management**
+- MicrosoftTeams (Teams admin module)
+- Microsoft.Graph.Teams (Graph API access)
 
-### **Batch Installation Strategy**
-```
-[BATCH 1/3] Core Modules
-├── ImportExcel
-└── PSWriteWord
+### 🌐 SharePoint Online
+**SharePoint sites, lists, and content management**
+- PnP.PowerShell (modern, recommended)
+- Microsoft.Graph.Sites (Graph API access)
+- Microsoft.Online.SharePoint.PowerShell (legacy)
 
-[BATCH 2/3] Graph Modules
-├── Microsoft.Graph.Authentication
-├── Microsoft.Graph.Users
-├── Microsoft.Graph.Groups
-├── Microsoft.Graph.Identity.SignIns
-├── Microsoft.Graph.Identity.DirectoryManagement
-├── Microsoft.Graph.Reports
-└── Microsoft.Graph.Security
+### 🔒 Security & Compliance
+**Security alerts, policies, and compliance features**
+- Microsoft.Graph.Security (security center)
+- Microsoft.Graph.Identity.SignIns (conditional access)
+- Microsoft.Graph.Identity.Governance (PIM, access reviews)
 
-[BATCH 3/3] Service Modules
-├── ExchangeOnlineManagement
-├── MicrosoftTeams
-└── PnP.PowerShell (PS7) / SharePointPnPPowerShellOnline (PS5.1)
-```
+### 📊 Reporting & Analytics
+**Usage reports, analytics, and data visualization**
+- Microsoft.Graph.Reports (M365 usage reports)
+- ImportExcel (Excel file manipulation)
+- PSWriteWord (Word document generation)
+- PSWriteHTML (HTML report generation)
 
-## 🛠️ **Troubleshooting**
+### ⚡ Power Platform
+**Power Apps, Power Automate, Power BI administration**
+- Microsoft.PowerApps.Administration.PowerShell
+- Microsoft.PowerApps.PowerShell
+- Microsoft.Xrm.Data.PowerShell (Dataverse)
 
-### **Common Issues**
+### ☁️ Azure Integration
+**Azure services that integrate with Microsoft 365**
+- Az.Accounts (Azure authentication)
+- Az.Resources (resource management)
+- Az.Storage (storage services)
+- Az.KeyVault (secret management)
 
-#### **Function Capacity Exceeded (PowerShell 5.1)**
-```
-Function capacity 4096 has been exceeded for this scope
-```
-**Solution:** Let the script auto-upgrade to PowerShell 7, or run:
-```powershell
-winget install Microsoft.PowerShell
-pwsh
-.\Install-PowerShell-Modules-Automated.ps1
-```
+### 🛠️ Development & Automation
+**Tools for PowerShell development and CI/CD**
+- PSScriptAnalyzer (code quality)
+- Pester (testing framework)
+- Posh-Git (Git integration)
 
-#### **Module Locking Warnings**
-```
-WARNING: The version 'X.X.X' of module 'PackageManagement' is currently in use
-```
-**Solution:** This is normal and can be ignored. The script handles this automatically.
+## Configuration Customization
 
-#### **Repository Trust Prompts**
-```
-Are you sure you want to install the modules from 'PSGallery'?
-```
-**Solution:** Use automated mode (default) or run:
-```powershell
-Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-```
+### Version Management Strategies
 
-### **Manual PowerShell 7 Installation**
-If automatic installation fails:
-```powershell
-# Option 1: Winget
-winget install Microsoft.PowerShell
+The configuration uses a **balanced approach** that optimizes for both stability and security:
 
-# Option 2: Direct download
-# Visit: https://github.com/PowerShell/PowerShell/releases
+**Core Modules (Pinned for Stability):**
+```json
+"Microsoft.Graph.Authentication": {
+    "version": "2.0.0",  // Core authentication - stability critical
+    "description": "Required for all Graph operations",
+    "enabled": true,
+    "required": true
+},
+"Microsoft.Graph.Users": {
+    "version": "2.0.0",  // Essential identity management
+    "description": "User account management and properties",
+    "enabled": true
+}
 ```
 
-## 📚 **Post-Installation Usage**
-
-### **Microsoft Graph**
-```powershell
-Import-Module Microsoft.Graph.Authentication
-Connect-MgGraph -Scopes "User.ReadWrite.All"
-Get-MgUser -Top 10
+**Peripheral Modules (Latest for Updates):**
+```json
+"ExchangeOnlineManagement": {
+    "version": "latest",  // Service-specific modules benefit from updates
+    "description": "Exchange Online administration",
+    "enabled": true
+},
+"Microsoft.Graph.Security": {
+    "version": "latest",  // Security modules need latest threat intelligence
+    "description": "Security alerts and incidents",
+    "enabled": true
+}
 ```
 
-### **Exchange Online**
-```powershell
-Import-Module ExchangeOnlineManagement
-Connect-ExchangeOnline
-Get-Mailbox -ResultSize 10
+**Utility Modules (Latest for Features):**
+```json
+"ImportExcel": {
+    "version": "latest",  // Utility modules - new features rarely break
+    "description": "Excel file manipulation",
+    "enabled": true
+}
 ```
 
-### **SharePoint Online**
-```powershell
-# PowerShell 7
-Import-Module PnP.PowerShell
-Connect-PnPOnline -Url "https://tenant.sharepoint.com" -Interactive
+**Balanced Approach Rationale:**
+- **Pin core modules** (Authentication, Users, Groups) for environment stability
+- **Use "latest" for service modules** (Exchange, Teams, SharePoint) to get improvements
+- **Use "latest" for security modules** to get threat intelligence updates
+- **Use "latest" for utility modules** (Excel, Word) for new features and bug fixes
 
-# PowerShell 5.1
-Import-Module SharePointPnPPowerShellOnline
-Connect-PnPOnline -Url "https://tenant.sharepoint.com" -Interactive
+**Version Update Behavior:**
+- **Pinned modules**: Only update when you change the version number in JSON
+- **"Latest" modules**: Automatically update when newer versions are available
+- **Mixed versions**: Some modules update while core stability is maintained
+
+### Enable/Disable Entire Services
+```json
+"teams": {
+    "enabled": false,    // Disable all Teams modules
+    "modules": { ... }
+}
 ```
 
-### **Microsoft Teams**
-```powershell
-Import-Module MicrosoftTeams
-Connect-MicrosoftTeams
-Get-Team
+### Enable/Disable Individual Modules
+```json
+"Microsoft.Graph.Teams": {
+    "enabled": false,    // Keep Teams admin but disable Graph API
+    "version": "2.0.0"
+}
 ```
 
-## 🏗️ **Requirements**
-
-- **Operating System**: Windows 10/11 or Windows Server 2016+
-- **PowerShell**: 5.1+ (PowerShell 7+ automatically installed if missing)
-- **Execution Policy**: `RemoteSigned` or `Unrestricted`
-- **Internet Connection**: Required for module downloads
-- **Permissions**: 
-  - Standard user (for CurrentUser scope)
-  - Administrator (for AllUsers scope)
-
-### **Setting Execution Policy**
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+### Create Custom Profiles
+```json
+"profiles": {
+    "custom_team": {
+        "name": "My Team Setup",
+        "description": "Custom modules for our team",
+        "services": ["authentication", "exchange", "reporting"]
+    }
+}
 ```
 
-## 📖 **Script Features Breakdown**
+### Add New Services
+```json
+"newservice": {
+    "name": "New Microsoft Service",
+    "description": "Newly released service modules",
+    "enabled": false,
+    "priority": 11,
+    "modules": {
+        "Microsoft.NewService.PowerShell": {
+            "version": "1.0.0",
+            "enabled": true
+        }
+    }
+}
+```
 
-### **🤖 Intelligent Automation**
-- **Repository Trust**: Automatically configures PSGallery as trusted
-- **Version Detection**: Smart PowerShell version compatibility handling
-- **Error Recovery**: Graceful handling of module conflicts and locking
-- **Progress Tracking**: Real-time installation progress with percentages
+## Scalability Features
 
-### **🧠 Smart Module Management**
-- **Batch Processing**: Modules installed in optimized batches
-- **Dependency Handling**: Ensures proper module load order
-- **Conflict Resolution**: Handles module locking and version conflicts
-- **Memory Optimization**: Prevents function capacity overflow
+### Easy Extension
+- **New Microsoft services** → Add new service section
+- **Service updates** → Update modules within existing services
+- **Version management** → Update versions without structural changes
 
-### **📊 User Experience**
-- **Educational Interface**: Shows available options on every run
-- **Progress Visibility**: Clear batch summaries and progress indicators
-- **Pause Options**: Optional pauses between batches for review
-- **Error Explanation**: Detailed error diagnosis and solutions
+### Logical Organization
+- **Service-aligned** → Modules grouped by actual Microsoft 365 services
+- **Dependency-aware** → Priority-based installation order
+- **Role-based** → Profiles match real administrative roles
 
-## 🔒 **Security**
+### Maintenance Benefits
+- **Clear ownership** → Each service section has clear purpose
+- **Future-proof** → Structure adapts to new Microsoft services
+- **Documentation** → Each module includes purpose and description
 
-- **Trusted Sources**: Only installs from PowerShell Gallery
-- **Code Signing**: Script uses official Microsoft modules
-- **Scope Control**: Defaults to CurrentUser (no admin required)
-- **No Credentials**: Script doesn't handle or store credentials
+## Migration Guide
 
-## 📄 **License**
+### From Parameter-Based Script
+| Old Method | New Method |
+|------------|------------|
+| `-IncludeEnterprise` | `-Profile enterprise` |
+| `-IncludePowerPlatform` | `-EnableServices "powerplatform"` |
+| `-IncludeAll` | `-Profile enterprise` |
+| Multiple parameters | Single profile parameter |
 
-This project is licensed under the Apache License 2.0 with Commons Clause - see the [LICENSE](LICENSE) file for details.
+### From Category-Based Config
+| Old Category | New Services |
+|--------------|--------------|
+| `core` | `authentication`, `identity`, `exchange`, `teams`, `sharepoint` |
+| `enterprise` | `security` |
+| `powerplatform` | `powerplatform` |
+| `azure` | `azure` |
+| `devops` | `development` |
 
-### **Commons Clause Restriction**
-The Software is provided under the Apache License 2.0, with the additional restriction that you may not sell the software or any derivative work whose value derives substantially from this software.
+## Best Practices
 
-## 👨‍💻 **Author**
+### Starting Points
+- **New to M365**: Use `-Profile basic`
+- **Security focus**: Use `-Profile security`  
+- **Power Platform**: Use `-Profile power`
+- **Custom needs**: Create custom profile in JSON
 
-**JJ Milner** - Microsoft 365 Specialist
+### Maintenance
+- **Version updates**: Update version numbers in JSON
+- **New modules**: Add to appropriate service section
+- **Deprecations**: Set `"enabled": false` instead of deleting
 
-## 🤝 **Contributing**
+### Development
+- **Testing**: Use `-Interactive` to preview changes
+- **Automation**: Use profiles in scripts and CI/CD
+- **Documentation**: Leverage built-in descriptions
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](../../issues).
-
-### **Development Guidelines**
-1. Maintain PowerShell 5.1 compatibility
-2. Include comprehensive error handling
-3. Add progress indicators for long operations
-4. Update documentation for new features
-5. Test on both PowerShell 5.1 and 7+
-
-## ⭐ **Show Your Support**
-
-Give a ⭐ if this project helped you set up your Microsoft 365 PowerShell environment!
-
-## 📝 **Changelog**
-
-### **v1.2.0** - Enhanced Automation & UX
-- ✅ Added automatic PowerShell 7 installation and switching
-- ✅ Improved progress tracking with percentages
-- ✅ Added pause between batches option
-- ✅ Enhanced error handling for module conflicts
-- ✅ Added educational options display
-- ✅ Improved color scheme for better readability
-
-### **v1.1.0** - Compatibility & Diagnostics
-- ✅ Added PowerShell 5.1 function capacity management
-- ✅ Enhanced module import diagnostics
-- ✅ Added troubleshooting guidance
-- ✅ Improved batch installation strategy
-
-### **v1.0.0** - Initial Release
-- ✅ Core module installation functionality
-- ✅ Basic compatibility detection
-- ✅ Repository trust automation
-
----
-
-## 🔗 **Related Resources**
-
-- [Microsoft Graph PowerShell SDK Documentation](https://docs.microsoft.com/graph/powershell/get-started)
-- [Exchange Online PowerShell Documentation](https://docs.microsoft.com/powershell/exchange/)
-- [PnP PowerShell Documentation](https://pnp.github.io/powershell/)
-- [PowerShell 7 Installation Guide](https://docs.microsoft.com/powershell/scripting/install/installing-powershell)
-
----
-
-**Happy PowerShell scripting! 🚀**
+This service-based architecture makes the system much more maintainable and scales naturally with Microsoft's service evolution.
