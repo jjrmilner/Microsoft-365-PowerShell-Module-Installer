@@ -41,7 +41,7 @@ Common combinations for different admin roles:
 
 ### Interactive Menu (Recommended for New Users)
 ```powershell
-.\Install-Modules-Simple.ps1
+.\Install-ModulesSimple.ps1
 ```
 When run without parameters, the script displays an interactive menu:
 ```
@@ -88,37 +88,37 @@ Select an option [1-7]:
 ### Direct Profile Usage (Advanced Users)
 ```powershell
 # Basic Microsoft 365 administration
-.\Install-Modules-Simple.ps1 -Profile basic
+.\Install-ModulesSimple.ps1 -Profile basic
 
 # Security administrator
-.\Install-Modules-Simple.ps1 -Profile security
+.\Install-ModulesSimple.ps1 -Profile security
 
 # Power Platform administrator  
-.\Install-Modules-Simple.ps1 -Profile power
+.\Install-ModulesSimple.ps1 -Profile power
 
 # Full enterprise setup
-.\Install-Modules-Simple.ps1 -Profile enterprise
+.\Install-ModulesSimple.ps1 -Profile enterprise
 ```
 
 ### Custom Service Selection
 ```powershell
 # Only authentication and identity
-.\Install-Modules-Simple.ps1 -EnableServices "authentication,identity"
+.\Install-ModulesSimple.ps1 -EnableServices "authentication,identity"
 
 # Exchange and Teams only
-.\Install-Modules-Simple.ps1 -EnableServices "authentication,exchange,teams"
+.\Install-ModulesSimple.ps1 -EnableServices "authentication,exchange,teams"
 ```
 
 ### Silent Mode (Intune Deployment)
 ```powershell
 # Automated deployment - no user interaction
-.\Install-Modules-Simple.ps1 -Silent
+.\Install-ModulesSimple.ps1 -Silent
 
 # Silent with specific profile
-.\Install-Modules-Simple.ps1 -Silent -Profile basic
+.\Install-ModulesSimple.ps1 -Silent -Profile basic
 
 # Silent with force reinstall
-.\Install-Modules-Simple.ps1 -Silent -Force
+.\Install-ModulesSimple.ps1 -Silent -Force
 ```
 
 **Silent Mode Features:**
@@ -322,7 +322,7 @@ The script includes a Silent mode specifically designed for automated deployment
 
 ### Basic Intune Deployment
 ```powershell
-.\Install-Modules-Simple.ps1 -Silent
+.\Install-ModulesSimple.ps1 -Silent
 ```
 
 **Features:**
@@ -338,19 +338,19 @@ The script includes a Silent mode specifically designed for automated deployment
 - **Run in 64-bit PowerShell**: Yes
 
 ### Files Required for Intune Package
-1. `Install-Modules-Simple.ps1` (main script)
+1. `Install-ModulesSimple.ps1` (main script)
 2. `modules-config.json` (configuration file)
 
 ### Alternative Silent Commands
 ```powershell
 # Minimal installation
-.\Install-Modules-Simple.ps1 -Silent -Profile basic
+.\Install-ModulesSimple.ps1 -Silent -Profile basic
 
 # Security-focused installation  
-.\Install-Modules-Simple.ps1 -Silent -Profile security
+.\Install-ModulesSimple.ps1 -Silent -Profile security
 
 # Force reinstall for troubleshooting
-.\Install-Modules-Simple.ps1 -Silent -Force
+.\Install-ModulesSimple.ps1 -Silent -Force
 ```
 
 For detailed Intune deployment instructions, see `Intune-Deployment-Guide.md`.
