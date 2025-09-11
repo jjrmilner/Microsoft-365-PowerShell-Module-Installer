@@ -2,11 +2,11 @@
 
 ## Overview
 
-This installer uses a scalable, service-based organization that mirrors how Microsoft 365 services are actually structured. Instead of arbitrary categories, modules are organized by the services they manage, making it intuitive and future-proof.
+This installer uses a scalable, service-based organisation that mirrors how Microsoft 365 services are actually structured. Instead of arbitrary categories, modules are organised by the services they manage, making it intuitive and future-proof.
 
 ## Scalable Architecture Benefits
 
-### Service-Based Organization
+### Service-Based Organisation
 Modules are grouped by the Microsoft 365 service they manage:
 - **Authentication** - Core authentication modules
 - **Identity** - User and directory management  
@@ -20,11 +20,11 @@ Modules are grouped by the Microsoft 365 service they manage:
 - **Development** - Development and automation tools
 
 ### Priority-Based Installation
-Services install in logical order based on dependencies:
+Services are installed in logical order based on dependencies:
 1. Authentication (required first)
 2. Identity (users/groups)
 3. Core services (Exchange, Teams, SharePoint)
-4. Specialized services (Security, Power Platform)
+4. Specialised services (Security, Power Platform)
 
 ### Predefined Profiles
 Common combinations for different admin roles:
@@ -52,22 +52,22 @@ When run without parameters, the script displays an interactive menu:
 
   [1] Basic Administrator
       Essential modules for day-to-day Microsoft 365 administration
-      Services: 6 (authentication, identity, exchange, teams, sharepoint, reporting)
+      Services: 6 (authentication, identity, exchange, teams, SharePoint, reporting)
       Modules: ~10 modules will be installed
 
   [2] Security Administrator  
       Core modules plus security and compliance tools
-      Services: 7 (authentication, identity, exchange, teams, sharepoint, security, reporting)
-      Modules: ~13 modules will be installed
+      Services: 7 (authentication, identity, exchange, teams, SharePoint, security, reporting)
+      Modules: ~13 modules will be installed.
 
   [3] Power Platform Administrator
       Core modules plus Power Platform administration
-      Services: 4 (authentication, identity, powerplatform, reporting)
+      Services: 4 (authentication, identity, Power Platform, reporting)
       Modules: ~8 modules will be installed
 
   [4] Developer/Automation
       Core modules plus development and automation tools
-      Services: 7 (authentication, identity, exchange, teams, sharepoint, development, reporting)
+      Services: 7 (authentication, identity, exchange, teams, SharePoint, development, reporting)
       Modules: ~13 modules will be installed
 
   [5] Enterprise Administrator
@@ -76,7 +76,7 @@ When run without parameters, the script displays an interactive menu:
       Modules: ~25 modules will be installed
 
   [6] Custom Configuration
-      Use your customized JSON configuration settings
+      Use your customised JSON configuration settings
       Services: Based on 'enabled' settings in modules-config.json
 
   [7] Exit
@@ -176,7 +176,7 @@ Select an option [1-7]:
 - Microsoft.Graph.Identity.Governance (PIM, access reviews)
 
 ### 📊 Reporting & Analytics
-**Usage reports, analytics, and data visualization**
+**Usage reports, analytics, and data visualisation**
 - Microsoft.Graph.Reports (M365 usage reports)
 - ImportExcel (Excel file manipulation)
 - PSWriteWord (Word document generation)
@@ -201,11 +201,11 @@ Select an option [1-7]:
 - Pester (testing framework)
 - Posh-Git (Git integration)
 
-## Configuration Customization
+## Configuration Customisation
 
 ### Version Management Strategies
 
-The configuration uses a **balanced approach** that optimizes for both stability and security:
+The configuration uses a **balanced approach** that optimises for both stability and security:
 
 **Core Modules (Pinned for Stability):**
 ```json
@@ -230,7 +230,7 @@ The configuration uses a **balanced approach** that optimizes for both stability
     "enabled": true
 },
 "Microsoft.Graph.Security": {
-    "version": "latest",  // Security modules need latest threat intelligence
+    "version": "latest",  // Security modules need the latest threat intelligence
     "description": "Security alerts and incidents",
     "enabled": true
 }
@@ -251,7 +251,7 @@ The configuration uses a **balanced approach** that optimizes for both stability
 - **Use "latest" for security modules** to get threat intelligence updates
 - **Use "latest" for utility modules** (Excel, Word) for new features and bug fixes
 
-**Version Update Behavior:**
+**Version Update Behaviour:**
 - **Pinned modules**: Only update when you change the version number in JSON
 - **"Latest" modules**: Automatically update when newer versions are available
 - **Mixed versions**: Some modules update while core stability is maintained
@@ -306,15 +306,15 @@ The configuration uses a **balanced approach** that optimizes for both stability
 - **Service updates** → Update modules within existing services
 - **Version management** → Update versions without structural changes
 
-### Logical Organization
+### Logical Organisation
 - **Service-aligned** → Modules grouped by actual Microsoft 365 services
 - **Dependency-aware** → Priority-based installation order
 - **Role-based** → Profiles match real administrative roles
 
 ### Maintenance Benefits
-- **Clear ownership** → Each service section has clear purpose
+- **Clear ownership** → Each service section has a clear purpose
 - **Future-proof** → Structure adapts to new Microsoft services
-- **Documentation** → Each module includes purpose and description
+- **Documentation** → Each module includes a purpose and description
 
 ## Intune/Enterprise Deployment
 
@@ -333,7 +333,7 @@ The script includes a Silent mode specifically designed for automated deployment
 - **Error resilience** - Continues on individual module failures
 
 ### Intune Configuration Requirements
-- **Run using logged on credentials**: Yes
+- **Run using logged-on credentials**: Yes
 - **Enforce script signature check**: No
 - **Run in 64-bit PowerShell**: Yes
 
