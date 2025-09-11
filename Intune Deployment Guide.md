@@ -10,28 +10,28 @@
 ### Deployment Command
 ```powershell
 # Place both files in same directory on Intune:
-# 1. Install-Modules-Simple.ps1
+# 1. Install-ModulesSimple.ps1
 # 2. modules-config.json
 
 # Use this as your PowerShell script content for Intune:
-.\Install-Modules-Simple.ps1 -Silent
+.\Install-ModulesSimple.ps1 -Silent
 ```
 
 ### Alternative Deployment Commands
 
 **Basic Profile (Minimal Modules):**
 ```powershell
-.\Install-Modules-Simple.ps1 -Silent -Profile basic
+.\Install-ModulesSimple.ps1 -Silent -Profile basic
 ```
 
 **Security Administrator Profile:**
 ```powershell
-.\Install-Modules-Simple.ps1 -Silent -Profile security
+.\Install-ModulesSimple.ps1 -Silent -Profile security
 ```
 
 **Force Reinstall (Troubleshooting):**
 ```powershell
-.\Install-Modules-Simple.ps1 -Silent -Force
+.\Install-ModulesSimple.ps1 -Silent -Force
 ```
 
 ### What Happens in Silent Mode
@@ -109,13 +109,13 @@
 **Testing Before Deployment:**
 ```powershell
 # Test on a single machine first
-.\Install-Modules-Simple.ps1 -Silent -Interactive
+.\Install-ModulesSimple.ps1 -Silent -Interactive
 ```
 
 **Cleanup for Testing:**
 ```powershell
 # Remove all modules for clean testing
-.\Install-Modules-Simple.ps1
+.\Install-ModulesSimple.ps1
 # Select option 7 (Remove All Modules)
 ```
 
@@ -151,7 +151,7 @@
 ### Monitoring & Reporting
 
 **Intune Reporting:**
-- Monitor via Intune > Scripts > Install-Modules-Simple
+- Monitor via Intune > Scripts > Install-ModulesSimple
 - Check exit codes and execution logs
 - Review failed deployments for troubleshooting
 
