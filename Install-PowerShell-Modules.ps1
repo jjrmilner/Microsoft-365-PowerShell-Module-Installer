@@ -22,30 +22,30 @@
     Show configuration and prompt for confirmation before installation
 
 .PARAMETER FixGraphVersions
-    Automatically fix Microsoft Graph module version conflicts
+    Automatically fix Microsoft Graph module version conflicts.
 
 .EXAMPLE
-    .\Install-Modules-Simple.ps1
-    # Shows interactive menu to select from predefined profiles
+    .\Install-ModulesSimple.ps1
+    # Shows an interactive menu to select from predefined profiles
 
 .EXAMPLE
-    .\Install-Modules-Simple.ps1 -Profile security
+    .\Install-ModulesSimple.ps1 -Profile security
     # Uses security profile directly (bypasses menu)
 
 .EXAMPLE
-    .\Install-Modules-Simple.ps1 -EnableServices "authentication,identity,exchange"
+    .\Install-ModulesSimple.ps1 -EnableServices "authentication,identity,exchange"
     # Installs only specified services regardless of profile
 
 .EXAMPLE
-    .\Install-Modules-Simple.ps1 -Interactive
+    .\Install-ModulesSimple.ps1 -Interactive
     # Shows what will be installed and asks for confirmation (works with menu or parameters)
 
 .EXAMPLE
-    .\Install-Modules-Simple.ps1 -Silent
+    .\Install-ModulesSimple.ps1 -Silent
     # Silent mode for Intune deployment - auto-upgrades to PS7 and installs enterprise profile
 
 .EXAMPLE
-    .\Install-Modules-Simple.ps1 -Silent -Profile basic
+    .\Install-ModulesSimple.ps1 -Silent -Profile basic
     # Silent mode with specific profile (overrides default enterprise profile)
 
  .LICENSE
@@ -106,7 +106,7 @@ param(
     [switch]$Silent
 )
 
-# Color configuration
+# Colour configuration
 $Colors = @{
     Header = 'Cyan'
     Success = 'Green'
@@ -159,7 +159,7 @@ function Remove-AllModules {
     if ($confirmation -eq 'DELETE ALL MODULES') {
         Write-ColorOutput "`nProceeding with module removal..." -Color $Colors.Warning
         
-        # Build list of all modules from configuration
+        # Build a list of all modules from the configuration
         $allModules = @()
         foreach ($serviceProperty in $Config.services.PSObject.Properties) {
             $service = $serviceProperty.Value
@@ -390,7 +390,7 @@ function Show-ProfileMenu {
     
     # Add custom option
     Write-ColorOutput "`n  [$menuIndex] Custom Configuration" -Color $Colors.Warning
-    Write-ColorOutput "      Use your customized JSON configuration settings" -Color $Colors.Info
+    Write-ColorOutput "      Use your customised JSON configuration settings" -Color $Colors.Info
     Write-ColorOutput "      Services: Based on 'enabled' settings in modules-config.json" -Color $Colors.Progress
     
     # Add cleanup option
@@ -406,8 +406,8 @@ function Show-ProfileMenu {
     
     Write-ColorOutput "`n$('='*80)" -Color $Colors.Header
     Write-ColorOutput "Tip: You can also run with parameters:" -Color $Colors.Info
-    Write-ColorOutput "  .\Install-Modules-Simple.ps1 -Profile basic" -Color $Colors.Success
-    Write-ColorOutput "  .\Install-Modules-Simple.ps1 -EnableServices \"authentication,identity\"" -Color $Colors.Success
+    Write-ColorOutput "  .\Install-ModulesSimple.ps1 -Profile basic" -Color $Colors.Success
+    Write-ColorOutput "  .\Install-ModulesSimple.ps1 -EnableServices \"authentication,identity\"" -Color $Colors.Success
     Write-ColorOutput $('-'*80) -Color $Colors.Header
     
     do {
@@ -918,3 +918,4 @@ try {
     exit 1
 
 }
+
