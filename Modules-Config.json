@@ -1,0 +1,291 @@
+{
+    "_comment": "Microsoft 365 PowerShell Module Configuration - Service-Based Organization",
+    "_instructions": "Set 'enabled': false to disable a service area or individual module",
+    "_version": "2.0",
+    
+    "services": {
+        "authentication": {
+            "name": "Authentication & Core",
+            "description": "Required authentication and foundational modules",
+            "enabled": true,
+            "priority": 1,
+            "modules": {
+                "Microsoft.Graph.Authentication": {
+                    "version": "2.0.0",
+                    "description": "Microsoft Graph authentication - required for all Graph operations",
+                    "enabled": true,
+                    "required": true
+                },
+                "MSAL.PS": {
+                    "version": "2.0.0",
+                    "description": "Microsoft Authentication Library for advanced auth scenarios",
+                    "enabled": true
+                }
+            }
+        },
+
+        "identity": {
+            "name": "Identity & Directory Management",
+            "description": "User, group, and directory administration",
+            "enabled": true,
+            "priority": 2,
+            "modules": {
+                "Microsoft.Graph.Users": {
+                    "version": "2.0.0",
+                    "description": "User account management and properties",
+                    "enabled": true
+                },
+                "Microsoft.Graph.Groups": {
+                    "version": "2.0.0",
+                    "description": "Group management (Microsoft 365, Security, Distribution)",
+                    "enabled": true
+                },
+                "Microsoft.Graph.Identity.DirectoryManagement": {
+                    "version": "2.0.0",
+                    "description": "Directory roles, administrative units, domains",
+                    "enabled": false
+                },
+                "Microsoft.Graph.Applications": {
+                    "version": "2.0.0",
+                    "description": "App registrations, service principals, enterprise apps",
+                    "enabled": false
+                }
+            }
+        },
+
+        "exchange": {
+            "name": "Exchange Online",
+            "description": "Email, calendar, and Exchange administration",
+            "enabled": true,
+            "priority": 3,
+            "modules": {
+                "ExchangeOnlineManagement": {
+                    "version": "latest",
+                    "description": "Exchange Online administration (mailboxes, mail flow, compliance)",
+                    "enabled": true
+                }
+            }
+        },
+
+        "teams": {
+            "name": "Microsoft Teams",
+            "description": "Teams administration and management",
+            "enabled": true,
+            "priority": 4,
+            "modules": {
+                "MicrosoftTeams": {
+                    "version": "latest",
+                    "description": "Teams administration (policies, settings, users)",
+                    "enabled": true
+                },
+                "Microsoft.Graph.Teams": {
+                    "version": "latest",
+                    "description": "Teams via Graph API (compliance, advanced management)",
+                    "enabled": false
+                }
+            }
+        },
+
+        "sharepoint": {
+            "name": "SharePoint Online",
+            "description": "SharePoint sites, lists, and content management",
+            "enabled": true,
+            "priority": 5,
+            "modules": {
+                "PnP.PowerShell": {
+                    "version": "latest",
+                    "description": "Modern SharePoint administration (recommended)",
+                    "enabled": true
+                },
+                "Microsoft.Graph.Sites": {
+                    "version": "latest",
+                    "description": "SharePoint sites via Graph API",
+                    "enabled": false
+                },
+                "Microsoft.Online.SharePoint.PowerShell": {
+                    "version": "latest",
+                    "description": "Classic SharePoint Online management (legacy)",
+                    "enabled": false
+                }
+            }
+        },
+
+        "security": {
+            "name": "Security & Compliance",
+            "description": "Security alerts, policies, and compliance features",
+            "enabled": false,
+            "priority": 6,
+            "modules": {
+                "Microsoft.Graph.Security": {
+                    "version": "latest",
+                    "description": "Security alerts, incidents, and threat intelligence",
+                    "enabled": true
+                },
+                "Microsoft.Graph.Identity.SignIns": {
+                    "version": "latest",
+                    "description": "Sign-in logs, conditional access, risk events",
+                    "enabled": true
+                },
+                "Microsoft.Graph.Identity.Governance": {
+                    "version": "latest",
+                    "description": "Privileged Identity Management (PIM), access reviews",
+                    "enabled": true
+                }
+            }
+        },
+
+        "reporting": {
+            "name": "Reporting & Analytics",
+            "description": "Usage reports, analytics, and data visualization",
+            "enabled": true,
+            "priority": 7,
+            "modules": {
+                "Microsoft.Graph.Reports": {
+                    "version": "latest",
+                    "description": "Microsoft 365 usage reports and analytics",
+                    "enabled": true
+                },
+                "ImportExcel": {
+                    "version": "latest",
+                    "description": "Excel file creation and manipulation",
+                    "enabled": true
+                },
+                "PSWriteWord": {
+                    "version": "latest",
+                    "description": "Word document generation and manipulation",
+                    "enabled": true
+                },
+                "PSWriteHTML": {
+                    "version": "latest",
+                    "description": "Professional HTML report generation",
+                    "enabled": false
+                }
+            }
+        },
+
+        "powerplatform": {
+            "name": "Power Platform",
+            "description": "Power Apps, Power Automate, Power BI administration",
+            "enabled": false,
+            "priority": 8,
+            "modules": {
+                "Microsoft.PowerApps.Administration.PowerShell": {
+                    "version": "latest",
+                    "description": "Power Apps tenant and environment administration",
+                    "enabled": true
+                },
+                "Microsoft.PowerApps.PowerShell": {
+                    "version": "latest",
+                    "description": "Power Apps development and management tools",
+                    "enabled": true
+                },
+                "Microsoft.Xrm.Data.PowerShell": {
+                    "version": "latest",
+                    "description": "Dataverse (Common Data Service) data operations",
+                    "enabled": true
+                }
+            }
+        },
+
+        "azure": {
+            "name": "Azure Integration",
+            "description": "Azure services that integrate with Microsoft 365",
+            "enabled": false,
+            "priority": 9,
+            "modules": {
+                "Az.Accounts": {
+                    "version": "latest",
+                    "description": "Azure authentication and subscription context",
+                    "enabled": true,
+                    "required": true
+                },
+                "Az.Resources": {
+                    "version": "latest",
+                    "description": "Azure resource management (resource groups, deployments)",
+                    "enabled": true
+                },
+                "Az.Storage": {
+                    "version": "latest",
+                    "description": "Azure Storage (blobs, files, queues, tables)",
+                    "enabled": true
+                },
+                "Az.KeyVault": {
+                    "version": "latest",
+                    "description": "Azure Key Vault for secrets and certificate management",
+                    "enabled": false
+                },
+                "Az.Monitor": {
+                    "version": "latest",
+                    "description": "Azure Monitor for logging and alerting",
+                    "enabled": false
+                }
+            }
+        },
+
+        "development": {
+            "name": "Development & Automation",
+            "description": "Tools for PowerShell development and CI/CD",
+            "enabled": false,
+            "priority": 10,
+            "modules": {
+                "PSScriptAnalyzer": {
+                    "version": "latest",
+                    "description": "PowerShell script quality analysis and best practices",
+                    "enabled": true
+                },
+                "Pester": {
+                    "version": "latest",
+                    "description": "PowerShell testing framework",
+                    "enabled": true
+                },
+                "Posh-Git": {
+                    "version": "latest",
+                    "description": "Git integration for PowerShell (enhanced prompt and tab completion)",
+                    "enabled": false
+                },
+                "PSWriteColor": {
+                    "version": "latest",
+                    "description": "Enhanced console output with colors",
+                    "enabled": false
+                }
+            }
+        }
+    },
+
+    "profiles": {
+        "basic": {
+            "name": "Basic Administrator",
+            "description": "Essential modules for day-to-day Microsoft 365 administration",
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "reporting"]
+        },
+        "security": {
+            "name": "Security Administrator", 
+            "description": "Core modules plus security and compliance tools",
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "security", "reporting"]
+        },
+        "power": {
+            "name": "Power Platform Administrator",
+            "description": "Core modules plus Power Platform administration",
+            "services": ["authentication", "identity", "powerplatform", "reporting"]
+        },
+        "developer": {
+            "name": "Developer/Automation",
+            "description": "Core modules plus development and automation tools",
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "development", "reporting"]
+        },
+        "enterprise": {
+            "name": "Enterprise Administrator",
+            "description": "All modules for comprehensive Microsoft 365 and Azure management",
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "security", "powerplatform", "azure", "development", "reporting"]
+        }
+    },
+
+    "settings": {
+        "defaultScope": "CurrentUser",
+        "defaultProfile": "basic",
+        "autoUpdateModules": false,
+        "skipVersionCheck": false,
+        "pauseBetweenBatches": false,
+        "showDetailedProgress": true
+    }
+}
