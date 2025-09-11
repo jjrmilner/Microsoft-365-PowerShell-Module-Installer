@@ -109,6 +109,37 @@ Select an option [1-7]:
 .\Install-Modules-Simple.ps1 -EnableServices "authentication,exchange,teams"
 ```
 
+### Silent Mode (Intune Deployment)
+```powershell
+# Automated deployment - no user interaction
+.\Install-Modules-Simple.ps1 -Silent
+
+# Silent with specific profile
+.\Install-Modules-Simple.ps1 -Silent -Profile basic
+
+# Silent with force reinstall
+.\Install-Modules-Simple.ps1 -Silent -Force
+```
+
+**Silent Mode Features:**
+- Automatically upgrades to PowerShell 7 if available
+- Uses enterprise profile by default (all modules)
+- No interactive menus or prompts
+- Suitable for Intune/automated deployment
+- Returns proper exit codes for monitoring
+
+## Parameters Reference
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `-ConfigFile` | Path to JSON configuration file | `-ConfigFile "custom-config.json"` |
+| `-EnableServices` | Comma-separated services to install | `-EnableServices "authentication,identity"` |
+| `-Profile` | Predefined profile to use | `-Profile security` |
+| `-Force` | Force reinstall existing modules | `-Force` |
+| `-Interactive` | Show confirmation before installation | `-Interactive` |
+| `-FixGraphVersions` | Fix Microsoft Graph version conflicts | `-FixGraphVersions` |
+| `-Silent` | Automated deployment mode (no prompts) | `-Silent` |
+
 ## Service Details
 
 ### 🔐 Authentication & Core
@@ -284,6 +315,45 @@ The configuration uses a **balanced approach** that optimizes for both stability
 - **Clear ownership** → Each service section has clear purpose
 - **Future-proof** → Structure adapts to new Microsoft services
 - **Documentation** → Each module includes purpose and description
+
+## Intune/Enterprise Deployment
+
+The script includes a Silent mode specifically designed for automated deployment through Microsoft Intune or other enterprise management tools.
+
+### Basic Intune Deployment
+```powershell
+.\Install-Modules-Simple.ps1 -Silent
+```
+
+**Features:**
+- **Zero user interaction** - Fully automated execution
+- **Automatic PowerShell 7 upgrade** - Detects and upgrades without prompts
+- **Enterprise profile default** - Installs comprehensive module set (~21 modules)
+- **Proper exit codes** - For deployment monitoring and reporting
+- **Error resilience** - Continues on individual module failures
+
+### Intune Configuration Requirements
+- **Run using logged on credentials**: Yes
+- **Enforce script signature check**: No
+- **Run in 64-bit PowerShell**: Yes
+
+### Files Required for Intune Package
+1. `Install-Modules-Simple.ps1` (main script)
+2. `modules-config.json` (configuration file)
+
+### Alternative Silent Commands
+```powershell
+# Minimal installation
+.\Install-Modules-Simple.ps1 -Silent -Profile basic
+
+# Security-focused installation  
+.\Install-Modules-Simple.ps1 -Silent -Profile security
+
+# Force reinstall for troubleshooting
+.\Install-Modules-Simple.ps1 -Silent -Force
+```
+
+For detailed Intune deployment instructions, see `Intune-Deployment-Guide.md`.
 
 ## Migration Guide
 
