@@ -150,7 +150,7 @@
                     "description": "Excel file creation and manipulation",
                     "enabled": true
                 },
-                "PSWriteWord": {
+                "PSWriteOffice": {
                     "version": "latest",
                     "description": "Word document generation and manipulation",
                     "enabled": true
@@ -288,4 +288,5 @@
         "pauseBetweenBatches": false,
         "showDetailedProgress": true
     }
+
 }
