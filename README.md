@@ -393,3 +393,19 @@ For detailed Intune deployment instructions, see `Intune-Deployment-Guide.md`.
 - **Documentation**: Leverage built-in descriptions
 
 This service-based architecture makes the system much more maintainable and scales naturally with Microsoft's service evolution.
+
+## 📄 License
+
+Licensed under the Apache License, Version 2.0 (the "Apache License") with Commons Clause Restriction.
+
+You may not use this file except in compliance with the Apache License. You may obtain a copy of the Apache License at: http://www.apache.org/licenses/LICENSE-2.0
+
+This Software is provided under the Apache License with the following Commons Clause Restriction:
+
+"The license granted herein does not include, and the Apache License does not grant to you, the right to Sell the Software. For purposes of this restriction, "Sell" means practicing any or all of the rights granted to you under the Apache License to provide to third parties, for a fee or other consideration (including without limitation fees for hosting, consulting, implementation, or support services related to the Software), a product or service whose value derives, entirely or substantially, from the functionality of the Software. Any license notice or attribution required by the Apache License must also include this Commons Clause Restriction."
+
+For paid/professional use cases prohibited above, obtain a commercial license from Global Micro Solutions (Pty) Ltd: licensing@globalmicro.co.za
+
+## ⚠️ Warranty Disclaimer
+
+Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the Apache License for the specific language governing permissions and limitations under the License.
