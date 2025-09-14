@@ -394,8 +394,9 @@ For detailed Intune deployment instructions, see `Intune-Deployment-Guide.md`.
 
 This service-based architecture makes the system much more maintainable and scales naturally with Microsoft's service evolution.
 
+---
 
-**License:** Apache 2.0 (see LICENSE)  
+## 📄 **License:** Apache 2.0 (see LICENSE)  
 **Additional restriction:** Commons Clause (see COMMONS-CLAUSE.txt)
 
 **SPDX headers**
@@ -421,3 +422,4 @@ Contact Global Micro Solutions (Pty) Ltd at:
 ## ⚠️ Warranty Disclaimer
 
 Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Please review the Apache-2.0 WITH Commons-Clause License for the specific language governing permissions and limitations under the License.
+
