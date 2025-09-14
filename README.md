@@ -394,18 +394,9 @@ For detailed Intune deployment instructions, see `Intune-Deployment-Guide.md`.
 
 This service-based architecture makes the system much more maintainable and scales naturally with Microsoft's service evolution.
 
-## Licensing at a Glance
 
-**Short version:** Free for end users, attribution required, no resale/hosting/consulting built on the tool without a commercial licence.
-
-- **Licence:** Apache 2.0 with Commons Clause.
-- **Free internal use:** You may use this tool inside your organisation at no cost.
-- **Attribution:** Retain copyright, licence notices, and any NOTICE file.
-- **No resale / SaaS / paid services based on the tool:** You may not sell, repackage, host as a managed service, or offer paid consulting/support where the value substantially derives from this tool without a commercial licence.
-
-**Commercial licence**
-- Need to embed this in a paid product, offer it as a managed service, or use it in paid consulting? Contact Global Micro Solutions (Pty) Ltd: <licensing@globalmicro.co.za>.
-- See `COMMERCIAL-LICENCE.md` for terms.
+**License:** Apache 2.0 (see LICENSE)  
+**Additional restriction:** Commons Clause (see COMMONS-CLAUSE.txt)
 
 **SPDX headers**
 - Each source file includes:  
@@ -429,4 +420,4 @@ Contact Global Micro Solutions (Pty) Ltd at:
 
 ## ⚠️ Warranty Disclaimer
 
-Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the Apache License for the specific language governing permissions and limitations under the License.
+Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Please review the Apache-2.0 WITH Commons-Clause License for the specific language governing permissions and limitations under the License.
