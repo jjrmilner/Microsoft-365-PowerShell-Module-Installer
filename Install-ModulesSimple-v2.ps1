@@ -25,7 +25,7 @@
     Force reinstall existing modules (skips existence check)
 
 .PARAMETER Interactive
-    Show configuration and prompt for confirmation before installation
+    Show configuration and prompt for confirmation before installation.
 
 .PARAMETER FixGraphVersions
     Automatically fix Microsoft Graph module version conflicts
