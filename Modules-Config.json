@@ -45,6 +45,11 @@
                     "description": "Directory roles, administrative units, domains",
                     "enabled": false
                 },
+                "Microsoft.Graph.Identity.Governance": {
+                    "version": "latest",
+                    "description": "Identity governance: access reviews, entitlement management, lifecycle workflows",
+                    "enabled": false
+                },                
                 "Microsoft.Graph.Applications": {
                     "version": "2.0.0",
                     "description": "App registrations, service principals, enterprise apps",
@@ -290,3 +295,4 @@
     }
 
 }
+
