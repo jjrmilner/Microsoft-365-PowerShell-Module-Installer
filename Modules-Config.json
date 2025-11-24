@@ -1,8 +1,8 @@
 {
-    "_comment": "Microsoft 365 PowerShell Module Configuration - Service-Based Organization",
+    "_comment": "Microsoft 365 PowerShell Module Configuration - ISO 27001 Evidence Collection",
     "_instructions": "Set 'enabled': false to disable a service area or individual module",
-    "_version": "2.0",
-    
+    "_version": "2.1-ISO27001",
+    "_changes": "Enabled modules required for ISO 27001:2022 A.8.x evidence collection",
     "services": {
         "authentication": {
             "name": "Authentication & Core",
@@ -14,7 +14,8 @@
                     "version": "2.0.0",
                     "description": "Microsoft Graph authentication - required for all Graph operations",
                     "enabled": true,
-                    "required": true
+                    "required": true,
+                    "_iso27001": "Required for all collection scripts"
                 },
                 "MSAL.PS": {
                     "version": "4.37.0.0",
@@ -23,7 +24,6 @@
                 }
             }
         },
-
         "identity": {
             "name": "Identity & Directory Management",
             "description": "User, group, and directory administration",
@@ -33,23 +33,27 @@
                 "Microsoft.Graph.Users": {
                     "version": "2.0.0",
                     "description": "User account management and properties",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for A.8.5 (Secure Authentication)"
                 },
                 "Microsoft.Graph.Groups": {
                     "version": "2.0.0",
                     "description": "Group management (Microsoft 365, Security, Distribution)",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for A.8.5 (Secure Authentication)"
                 },
                 "Microsoft.Graph.Identity.DirectoryManagement": {
                     "version": "2.0.0",
                     "description": "Directory roles, administrative units, domains",
-                    "enabled": false
+                    "enabled": true,
+                    "_iso27001": "CHANGED: Was false - Required for A.8.2 (Privileged Access Rights)"
                 },
                 "Microsoft.Graph.Identity.Governance": {
                     "version": "latest",
                     "description": "Identity governance: access reviews, entitlement management, lifecycle workflows",
-                    "enabled": false
-                },                
+                    "enabled": true,
+                    "_iso27001": "CHANGED: Was false - Required for A.8.2 (Privileged Access Rights - PIM, Access Reviews)"
+                },
                 "Microsoft.Graph.Applications": {
                     "version": "2.0.0",
                     "description": "App registrations, service principals, enterprise apps",
@@ -57,7 +61,6 @@
                 }
             }
         },
-
         "exchange": {
             "name": "Exchange Online",
             "description": "Email, calendar, and Exchange administration",
@@ -71,7 +74,6 @@
                 }
             }
         },
-
         "teams": {
             "name": "Microsoft Teams",
             "description": "Teams administration and management",
@@ -90,7 +92,6 @@
                 }
             }
         },
-
         "sharepoint": {
             "name": "SharePoint Online",
             "description": "SharePoint sites, lists, and content management",
@@ -114,31 +115,49 @@
                 }
             }
         },
-
+        "devicemanagement": {
+            "name": "Device & Endpoint Management",
+            "description": "Intune device management and compliance",
+            "enabled": true,
+            "priority": 5.5,
+            "_iso27001": "NEW SERVICE: Required for device-related controls",
+            "modules": {
+                "Microsoft.Graph.DeviceManagement": {
+                    "version": "latest",
+                    "description": "Intune device management, compliance policies, configuration profiles",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.1 (User Endpoint Devices) and A.8.7 (Protection Against Malware)"
+                }
+            }
+        },
         "security": {
             "name": "Security & Compliance",
             "description": "Security alerts, policies, and compliance features",
-            "enabled": false,
+            "enabled": true,
             "priority": 6,
+            "_iso27001": "CHANGED: Was false - Required for multiple controls",
             "modules": {
                 "Microsoft.Graph.Security": {
                     "version": "latest",
                     "description": "Security alerts, incidents, and threat intelligence",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for A.8.7 (Protection Against Malware)"
                 },
                 "Microsoft.Graph.Identity.SignIns": {
                     "version": "latest",
                     "description": "Sign-in logs, conditional access, risk events",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for A.8.3 (Information Access Restriction) and A.8.5 (Secure Authentication)"
                 },
                 "Microsoft.Graph.Identity.Governance": {
                     "version": "latest",
                     "description": "Privileged Identity Management (PIM), access reviews",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Duplicate of identity.governance - ensure one is enabled"
                 }
             }
         },
-
         "reporting": {
             "name": "Reporting & Analytics",
             "description": "Usage reports, analytics, and data visualization",
@@ -153,12 +172,14 @@
                 "ImportExcel": {
                     "version": "latest",
                     "description": "Excel file creation and manipulation",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for configuration file reading (ISO27001-Control-Metadata.xlsx)"
                 },
                 "PSWriteOffice": {
                     "version": "latest",
                     "description": "Word document generation and manipulation",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Optional - for future reporting enhancements"
                 },
                 "PSWriteHTML": {
                     "version": "latest",
@@ -167,7 +188,6 @@
                 }
             }
         },
-
         "powerplatform": {
             "name": "Power Platform",
             "description": "Power Apps, Power Automate, Power BI administration",
@@ -191,7 +211,6 @@
                 }
             }
         },
-
         "azure": {
             "name": "Azure Integration",
             "description": "Azure services that integrate with Microsoft 365",
@@ -226,7 +245,6 @@
                 }
             }
         },
-
         "development": {
             "name": "Development & Automation",
             "description": "Tools for PowerShell development and CI/CD",
@@ -256,43 +274,92 @@
             }
         }
     },
-
     "profiles": {
         "basic": {
             "name": "Basic Administrator",
             "description": "Essential modules for day-to-day Microsoft 365 administration",
-            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "reporting"]
+            "services": [
+                "authentication",
+                "identity",
+                "exchange",
+                "teams",
+                "sharepoint",
+                "reporting"
+            ]
         },
         "security": {
-            "name": "Security Administrator", 
+            "name": "Security Administrator",
             "description": "Core modules plus security and compliance tools",
-            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "security", "reporting"]
+            "services": [
+                "authentication",
+                "identity",
+                "exchange",
+                "teams",
+                "sharepoint",
+                "security",
+                "reporting"
+            ]
+        },
+        "iso27001": {
+            "name": "ISO 27001 Evidence Collection",
+            "description": "All modules required for ISO 27001:2022 Annex A.8.x evidence collection",
+            "services": [
+                "authentication",
+                "identity",
+                "devicemanagement",
+                "security",
+                "reporting"
+            ],
+            "_comment": "Optimized profile for running ISO 27001 collection scripts"
         },
         "power": {
             "name": "Power Platform Administrator",
             "description": "Core modules plus Power Platform administration",
-            "services": ["authentication", "identity", "powerplatform", "reporting"]
+            "services": [
+                "authentication",
+                "identity",
+                "powerplatform",
+                "reporting"
+            ]
         },
         "developer": {
             "name": "Developer/Automation",
             "description": "Core modules plus development and automation tools",
-            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "development", "reporting"]
+            "services": [
+                "authentication",
+                "identity",
+                "exchange",
+                "teams",
+                "sharepoint",
+                "development",
+                "reporting"
+            ]
         },
         "enterprise": {
             "name": "Enterprise Administrator",
             "description": "All modules for comprehensive Microsoft 365 and Azure management",
-            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "security", "powerplatform", "azure", "development", "reporting"]
+            "services": [
+                "authentication",
+                "identity",
+                "exchange",
+                "teams",
+                "sharepoint",
+                "devicemanagement",
+                "security",
+                "powerplatform",
+                "azure",
+                "development",
+                "reporting"
+            ]
         }
     },
-
     "settings": {
         "defaultScope": "CurrentUser",
-        "defaultProfile": "basic",
+        "defaultProfile": "iso27001",
         "autoUpdateModules": false,
         "skipVersionCheck": false,
         "pauseBetweenBatches": false,
-        "showDetailedProgress": true
+        "showDetailedProgress": true,
+        "_iso27001_comment": "Default profile changed to 'iso27001' for evidence collection workflow"
     }
-
 }
-
