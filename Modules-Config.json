@@ -214,34 +214,103 @@
         "azure": {
             "name": "Azure Integration",
             "description": "Azure services that integrate with Microsoft 365",
-            "enabled": false,
+            "enabled": true,
             "priority": 9,
+            "_iso27001": "CHANGED: Was false - Required for A.5.7 (Sentinel), A.8.6 (Capacity), A.8.9 (Configuration), A.8.13 (Backup)",
             "modules": {
                 "Az.Accounts": {
                     "version": "latest",
                     "description": "Azure authentication and subscription context",
                     "enabled": true,
-                    "required": true
+                    "required": true,
+                    "_iso27001": "Required for all Azure operations"
                 },
                 "Az.Resources": {
                     "version": "latest",
                     "description": "Azure resource management (resource groups, deployments)",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for A.8.9 (Configuration Management)"
                 },
                 "Az.Storage": {
                     "version": "latest",
                     "description": "Azure Storage (blobs, files, queues, tables)",
-                    "enabled": true
+                    "enabled": true,
+                    "_iso27001": "Required for A.8.13 (Information Backup)"
                 },
                 "Az.KeyVault": {
                     "version": "latest",
                     "description": "Azure Key Vault for secrets and certificate management",
-                    "enabled": false
+                    "enabled": true,
+                    "_iso27001": "Required for BTG authentication credentials"
                 },
                 "Az.Monitor": {
                     "version": "latest",
                     "description": "Azure Monitor for logging and alerting",
-                    "enabled": false
+                    "enabled": true,
+                    "_iso27001": "CHANGED: Was false - Required for A.5.7 (Threat Intelligence)"
+                },
+                "Az.Compute": {
+                    "version": "latest",
+                    "description": "Azure virtual machine management",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.6 (Capacity Management)"
+                },
+                "Az.Network": {
+                    "version": "latest",
+                    "description": "Azure network management (VNets, NSGs, firewalls)",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
+                },
+                "Az.OperationalInsights": {
+                    "version": "latest",
+                    "description": "Azure Sentinel workspace management",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.5.7 (Threat Intelligence - Sentinel)"
+                },
+                "Az.SecurityInsights": {
+                    "version": "latest",
+                    "description": "Azure Sentinel security operations",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.5.7 (Threat Intelligence - Sentinel)"
+                },
+                "Az.Sql": {
+                    "version": "latest",
+                    "description": "Azure SQL database management",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.13 (Information Backup)"
+                },
+                "Az.RecoveryServices": {
+                    "version": "latest",
+                    "description": "Azure backup and recovery services",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.13 (Information Backup)"
+                },
+                "Az.Cdn": {
+                    "version": "latest",
+                    "description": "Azure CDN management",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
+                },
+                "Az.FrontDoor": {
+                    "version": "latest",
+                    "description": "Azure Front Door management",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
+                },
+                "Az.TrafficManager": {
+                    "version": "latest",
+                    "description": "Azure Traffic Manager management",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
                 }
             }
         },
@@ -257,9 +326,11 @@
                     "enabled": true
                 },
                 "Pester": {
-                    "version": "latest",
-                    "description": "PowerShell testing framework",
-                    "enabled": true
+                    "version": "5.7.1",
+                    "description": "PowerShell testing framework (v5.7.1+ required - NOT compatible with v3.4.0)",
+                    "enabled": true,
+                    "required": true,
+                    "_iso27001": "CRITICAL: Must be v5.7.1+ for test suite. Uninstall old versions first: Uninstall-Module Pester -AllVersions"
                 },
                 "Posh-Git": {
                     "version": "latest",
@@ -306,11 +377,14 @@
             "services": [
                 "authentication",
                 "identity",
+                "exchange",
                 "devicemanagement",
                 "security",
+                "azure",
+                "development",
                 "reporting"
             ],
-            "_comment": "Optimized profile for running ISO 27001 collection scripts"
+            "_comment": "Optimized profile for running ISO 27001 collection scripts. Includes Azure modules for A.5.7, A.8.6, A.8.9, A.8.13, A.8.20. Pester v5.7.1+ required for test suite."
         },
         "power": {
             "name": "Power Platform Administrator",
