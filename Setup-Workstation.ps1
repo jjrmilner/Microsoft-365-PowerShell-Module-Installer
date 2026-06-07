@@ -103,20 +103,21 @@ if ($gitName -notmatch '^<' -and $PSCmdlet.ShouldProcess("user.name=$gitName",'g
 else { Warn "git user.name not set (placeholder). Put it in $localPath" }
 if ($gitEmail -notmatch '^<' -and $PSCmdlet.ShouldProcess("user.email=$gitEmail",'git config')) { git config --global user.email $gitEmail; Ok "git user.email = $gitEmail" }
 else { Warn "git user.email not set (placeholder). Put it in $localPath" }
-if ($g.'init.defaultBranch') { git config --global init.defaultBranch $g.'init.defaultBranch' | Out-Null; Ok "init.defaultBranch = $($g.'init.defaultBranch')" }
-if (Get-Command git -ErrorAction SilentlyContinue) { git lfs install 2>$null | Out-Null; Ok "git lfs install" }
+if ($g.'init.defaultBranch' -and $PSCmdlet.ShouldProcess("init.defaultBranch=$($g.'init.defaultBranch')",'git config')) { git config --global init.defaultBranch $g.'init.defaultBranch' | Out-Null; Ok "init.defaultBranch = $($g.'init.defaultBranch')" }
+if ((Get-Command git -ErrorAction SilentlyContinue) -and $PSCmdlet.ShouldProcess('git lfs','install')) { git lfs install 2>$null | Out-Null; Ok "git lfs install" }
 
 # --- 5. environment: GitHub CLI host + optional env var ---
 Step "GitHub CLI"
 $ghHost = OverrideOr ($local.githubCli) 'host' $cfg.environment.githubCli.host
 Info "  target host: $ghHost"
 if (Get-Command gh -ErrorAction SilentlyContinue) {
-    $authed = (gh auth status --hostname $ghHost 2>&1) -match 'Logged in'
-    if ($authed) { Ok "already authenticated to $ghHost" }
+    # gh auth status --hostname X exits 0 only when logged into THAT host (don't grep all hosts)
+    $null = gh auth status --hostname $ghHost 2>&1
+    if ($LASTEXITCODE -eq 0) { Ok "already authenticated to $ghHost" }
     else { Warn "Not logged in. Run:  gh auth login --hostname $ghHost --git-protocol https" }
 } else { Warn "gh not on PATH yet (open a new terminal after install)." }
 $ghEnv = OverrideOr ($local.envVars) 'GH_HOST' $cfg.environment.envVars.GH_HOST
-if ($ghEnv) { [Environment]::SetEnvironmentVariable('GH_HOST',$ghEnv,'User'); Ok "GH_HOST=$ghEnv (User env)" }
+if ($ghEnv -and $PSCmdlet.ShouldProcess("GH_HOST=$ghEnv (User env)",'Set')) { [Environment]::SetEnvironmentVariable('GH_HOST',$ghEnv,'User'); Ok "GH_HOST=$ghEnv (User env)" }
 
 # --- 6. hand off to the PowerShell module installer ---
 if (-not $SkipModules) {
@@ -124,10 +125,10 @@ if (-not $SkipModules) {
     $mi = $cfg.moduleInstaller
     $miPath = Join-Path $scriptDir $mi.script
     if (Test-Path $miPath) {
-        $args = @{ Profile = $mi.profile }
-        if ($mi.silent) { $args.Silent = $true }
+        $miArgs = @{ Profile = $mi.profile }
+        if ($mi.silent) { $miArgs.Silent = $true }
         Info "  running $($mi.script) -Profile $($mi.profile)$(if($mi.silent){' -Silent'})"
-        if ($PSCmdlet.ShouldProcess($mi.script,'run module installer')) { & $miPath @args }
+        if ($PSCmdlet.ShouldProcess($mi.script,'run module installer')) { & $miPath @miArgs }
     } else { Warn "Module installer not found next to this script: $miPath" }
 }
 
