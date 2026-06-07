@@ -20,6 +20,7 @@ Reporting, Power Platform, Azure, Development). v3 also bootstraps a full develo
 | `workstation-config.json` | Workstation manifest (winget IDs, VS Code extension IDs, environment) - **no secrets** |
 | `Setup-ConsoleFont.ps1` | *Opt-in* conhost Oh My Posh / Nerd Font fix (UTF-8 code page + font allow-list + `$PROFILE` managed block) |
 | `workstation.local.json` | *Optional, git-ignored* - your machine/org overrides (git identity, enterprise host) |
+| **`WORKSTATION-SETUP.md`** | **Comprehensive, first-principles guide to the workstation (non-PowerShell) layer** |
 | `Install-ModulesSimple-v2.ps1`, `Install-ModulesSimple.ps1` | Previous versions (reference) |
 | `Intune Deployment Guide.md` | Legacy silent-mode notes for MDM/Intune |
 
@@ -114,32 +115,50 @@ or use `"latest"`.
 
 ## Workstation Setup (the non-PowerShell layer)
 
-`Setup-Workstation.ps1` reads `workstation-config.json` and is **idempotent** (re-running skips what's
-already present). It installs:
+> 📖 **Full guide:** [`WORKSTATION-SETUP.md`](WORKSTATION-SETUP.md) — a first-principles walkthrough of
+> every workstation component (orchestrator, manifest, local override, winget tools, VS Code extensions,
+> environment, console-font fix, secrets model, design principles, troubleshooting). The summary below is
+> the short version.
 
-- **winget tools:** Git, Git LFS, GitHub CLI, PowerShell 7, .NET SDK, Node.js LTS, Python, Terraform,
-  Azure CLI, VS Code (Functions Core Tools / Bicep / Docker optional).
-- **VS Code extensions:** the functional set for .NET / Python / PowerShell / Azure / GitHub / Playwright work.
-- **Environment:** PSGallery trust, execution policy, `git` identity + `git lfs install`,
-  GitHub CLI host, optional `GH_HOST`.
-- Then runs `Install-ModulesSimple-v3.ps1 -Profile devworkstation -Silent`.
+This repo has **two layers**. The *module* layer (above) installs PowerShell modules from the Gallery.
+The *workstation* layer installs the native tool-chain and app/shell configuration that a module install
+can't — they use different package managers and failure modes, so they're kept separate and the
+workstation layer **hands off** to the module layer as its last step.
+
+`Setup-Workstation.ps1` reads `workstation-config.json`, is **idempotent** (re-running skips what's
+already present), and runs in order:
+
+1. **winget tools** — Git, Git LFS, GitHub CLI, PowerShell 7, .NET SDK, Node.js LTS, Python, Terraform,
+   Azure CLI, VS Code (Functions Core Tools / Bicep / Docker optional).
+2. **VS Code extensions** — the functional set for .NET / Python / PowerShell / Azure / GitHub / Playwright work.
+3. **Environment** — PSGallery trust, execution policy *(best-effort on locked-down machines)*,
+   `git` identity + `git lfs install`, GitHub CLI host, optional `GH_HOST`.
+4. **Modules** — runs `Install-ModulesSimple-v3.ps1 -Profile devworkstation -Silent`.
+
+```powershell
+.\Setup-Workstation.ps1                 # full bootstrap
+.\Setup-Workstation.ps1 -SkipModules    # tools + extensions + env only
+.\Setup-Workstation.ps1 -ConsoleFont    # also run the opt-in console-font fix
+.\Setup-Workstation.ps1 -WhatIf         # dry-run
+```
 
 > **Claude Code** is not a winget package - after Node installs:
 > `npm install -g @anthropic-ai/claude-code` (or `irm https://claude.ai/install.ps1 | iex`).
 
+**Built to run unattended.** Every winget call is forced non-interactive
+(`--accept-source-agreements --disable-interactivity`), native non-zero exits are prevented from
+aborting the run (`$PSNativeCommandUseErrorActionPreference = $false`), `Set-ExecutionPolicy` is
+best-effort (warns instead of crashing under WDAC/ConstrainedLanguage), the NuGet provider is
+bootstrapped before module installs, and a failed `Install-Module` automatically falls back to
+`Install-PSResource`. The reasoning behind each is in [`WORKSTATION-SETUP.md`](WORKSTATION-SETUP.md#12-design-principles-and-the-safety-mechanisms-that-enforce-them).
+
 ### Console font (Oh My Posh / Nerd Fonts) — opt-in
 
-`Setup-ConsoleFont.ps1` fixes powerline / Nerd Font glyphs in the **classic console host (conhost)** — Windows Terminal handles this automatically. It (1) sets the conhost code page to UTF-8 (65001) so UTF-8 glyphs stop turning into mojibake, (2) adds the Nerd Font to conhost's HKLM font allow-list (needs admin), and (3) writes a **non-destructive managed block** into `$PROFILE` that forces UTF-8 and loads Oh My Posh (guarded so it can't error if OMP isn't installed).
-
-It's **off by default**. Enable it with the switch, or set `consoleFont.enabled: true` in `workstation-config.json`:
-
-```powershell
-.\Setup-Workstation.ps1 -ConsoleFont    # tools + extensions + env + console font, then modules
-.\Setup-ConsoleFont.ps1                 # just the console-font fix (run elevated for the HKLM step)
-.\Setup-ConsoleFont.ps1 -WhatIf         # dry-run
-```
-
-Notes: console settings apply to **new** windows only (reopen after running); the HKLM allow-list step is skipped with a warning if not elevated; if you standardise on Windows Terminal you only need the `$PROFILE` UTF-8 lines plus `"font": { "face": "Cascadia Code NF" }` in `settings.json`.
+`Setup-ConsoleFont.ps1` fixes powerline / Nerd Font glyphs in the **classic console host (conhost)** —
+Windows Terminal handles this automatically. It sets the conhost code page to UTF-8 (65001), adds the
+Nerd Font to conhost's HKLM font allow-list (needs admin), and writes a **non-destructive managed block**
+into `$PROFILE`. Off by default; enable with `-ConsoleFont` or `consoleFont.enabled: true`. Full detail
+in [`WORKSTATION-SETUP.md` §9](WORKSTATION-SETUP.md#9-the-console-font-fix--setup-consolefontps1-opt-in).
 
 ### No secrets in this repo
 `workstation-config.json` ships generic placeholders. Put your machine/org specifics (git identity,
@@ -151,6 +170,21 @@ checklist of these at the end.
 ---
 
 ## Changelog
+
+### v3.2.0
+- **New doc:** [`WORKSTATION-SETUP.md`](WORKSTATION-SETUP.md) — a comprehensive, first-principles guide to
+  the workstation (non-PowerShell) layer and every component in it.
+- **Robustness — unattended runs no longer hang or abort** (`Setup-Workstation.ps1`,
+  `Install-ModulesSimple-v3.ps1`, `Setup-ConsoleFont.ps1`):
+  - winget calls forced non-interactive (`--accept-source-agreements --disable-interactivity`) — fixes a
+    hang on the un-accepted **msstore source-agreement** prompt.
+  - `$PSNativeCommandUseErrorActionPreference = $false` — a benign non-zero exit from winget/`gh` (PS 7.4+
+    behaviour under `-Stop`) no longer aborts the run.
+  - `Set-ExecutionPolicy` is now **best-effort** — warns instead of crashing on WDAC / ConstrainedLanguage machines.
+  - **NuGet provider bootstrap** before `Install-Module`, and `Install-Module` pinned non-interactive
+    (`-Force` on `-Silent`, `-Repository PSGallery`, `-Confirm:$false`).
+  - **`Install-PSResource` fallback** when `Install-Module` fails to extract a package
+    (*"End of Central Directory"* — e.g. OneDrive-redirected module paths / corrupt cached `.nupkg`).
 
 ### v3.1.0
 - New **opt-in console-font fix** (`Setup-ConsoleFont.ps1` + `-ConsoleFont` switch / `consoleFont.enabled`): UTF-8 conhost code page, Nerd Font HKLM allow-list, and a non-destructive `$PROFILE` managed block that loads Oh My Posh.
