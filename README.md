@@ -18,6 +18,7 @@ Reporting, Power Platform, Azure, Development). v3 also bootstraps a full develo
 | `Modules-Config.json` | Module catalogue: services, modules, profiles, settings |
 | `Setup-Workstation.ps1` | Workstation bootstrap: winget tools + VS Code extensions + git/gh/env, then the module installer |
 | `workstation-config.json` | Workstation manifest (winget IDs, VS Code extension IDs, environment) - **no secrets** |
+| `Setup-ConsoleFont.ps1` | *Opt-in* conhost Oh My Posh / Nerd Font fix (UTF-8 code page + font allow-list + `$PROFILE` managed block) |
 | `workstation.local.json` | *Optional, git-ignored* - your machine/org overrides (git identity, enterprise host) |
 | `Install-ModulesSimple-v2.ps1`, `Install-ModulesSimple.ps1` | Previous versions (reference) |
 | `Intune Deployment Guide.md` | Legacy silent-mode notes for MDM/Intune |
@@ -126,6 +127,20 @@ already present). It installs:
 > **Claude Code** is not a winget package - after Node installs:
 > `npm install -g @anthropic-ai/claude-code` (or `irm https://claude.ai/install.ps1 | iex`).
 
+### Console font (Oh My Posh / Nerd Fonts) — opt-in
+
+`Setup-ConsoleFont.ps1` fixes powerline / Nerd Font glyphs in the **classic console host (conhost)** — Windows Terminal handles this automatically. It (1) sets the conhost code page to UTF-8 (65001) so UTF-8 glyphs stop turning into mojibake, (2) adds the Nerd Font to conhost's HKLM font allow-list (needs admin), and (3) writes a **non-destructive managed block** into `$PROFILE` that forces UTF-8 and loads Oh My Posh (guarded so it can't error if OMP isn't installed).
+
+It's **off by default**. Enable it with the switch, or set `consoleFont.enabled: true` in `workstation-config.json`:
+
+```powershell
+.\Setup-Workstation.ps1 -ConsoleFont    # tools + extensions + env + console font, then modules
+.\Setup-ConsoleFont.ps1                 # just the console-font fix (run elevated for the HKLM step)
+.\Setup-ConsoleFont.ps1 -WhatIf         # dry-run
+```
+
+Notes: console settings apply to **new** windows only (reopen after running); the HKLM allow-list step is skipped with a warning if not elevated; if you standardise on Windows Terminal you only need the `$PROFILE` UTF-8 lines plus `"font": { "face": "Cascadia Code NF" }` in `settings.json`.
+
 ### No secrets in this repo
 `workstation-config.json` ships generic placeholders. Put your machine/org specifics (git identity,
 enterprise GitHub host) in **`workstation.local.json`** - it's git-ignored. Credentials are never
@@ -135,7 +150,14 @@ checklist of these at the end.
 
 ---
 
-## v3 Changes
+## Changelog
+
+### v3.1.0
+- New **opt-in console-font fix** (`Setup-ConsoleFont.ps1` + `-ConsoleFont` switch / `consoleFont.enabled`): UTF-8 conhost code page, Nerd Font HKLM allow-list, and a non-destructive `$PROFILE` managed block that loads Oh My Posh.
+- **Fix:** `workstation-config.json` `moduleInstaller.script` now points at `Install-ModulesSimple-v3.ps1` (was `-v2`, which rejected the `devworkstation` profile).
+- **Fix (`Setup-Workstation.ps1`):** `git lfs install`, `git config init.defaultBranch` and the `GH_HOST` env-set are now gated by `-WhatIf`; gh-auth detection uses the host-scoped exit code; `$args` renamed to avoid shadowing the automatic variable.
+
+### v3.0.0
 
 - **Bug fix:** valid profiles are read from the config, not a hard-coded list - previously selecting
   `iso27001`/`devworkstation` (or any non-default profile) from the menu errored with *"Invalid profile"*.

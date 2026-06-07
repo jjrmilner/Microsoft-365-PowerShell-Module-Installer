@@ -27,7 +27,8 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [string]$ConfigFile = "workstation-config.json",
-    [switch]$SkipModules
+    [switch]$SkipModules,
+    [switch]$ConsoleFont
 )
 
 $ErrorActionPreference = 'Stop'
@@ -118,6 +119,18 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
 } else { Warn "gh not on PATH yet (open a new terminal after install)." }
 $ghEnv = OverrideOr ($local.envVars) 'GH_HOST' $cfg.environment.envVars.GH_HOST
 if ($ghEnv -and $PSCmdlet.ShouldProcess("GH_HOST=$ghEnv (User env)",'Set')) { [Environment]::SetEnvironmentVariable('GH_HOST',$ghEnv,'User'); Ok "GH_HOST=$ghEnv (User env)" }
+
+# --- 5b. OPT-IN: conhost Oh My Posh / Nerd Font fix ---
+if ($ConsoleFont -or ($cfg.consoleFont -and $cfg.consoleFont.enabled)) {
+    Step "Console font (Oh My Posh / Nerd Font - conhost only)"
+    $cf = Join-Path $scriptDir 'Setup-ConsoleFont.ps1'
+    if (Test-Path $cf) {
+        $cfArgs = @{}
+        if ($cfg.consoleFont -and $cfg.consoleFont.nerdFont) { $cfArgs.NerdFont = $cfg.consoleFont.nerdFont }
+        if ($cfg.consoleFont -and ($cfg.consoleFont.installOhMyPosh -eq $false)) { $cfArgs.SkipOhMyPosh = $true }
+        & $cf @cfArgs    # -WhatIf propagates via $WhatIfPreference
+    } else { Warn "Setup-ConsoleFont.ps1 not found next to this script" }
+}
 
 # --- 6. hand off to the PowerShell module installer ---
 if (-not $SkipModules) {

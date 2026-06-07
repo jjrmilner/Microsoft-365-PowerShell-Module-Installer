@@ -81,9 +81,17 @@
         }
     },
 
+    "consoleFont": {
+        "_note": "OPT-IN conhost Oh My Posh / Nerd Font fix (Setup-ConsoleFont.ps1). Off by default - it touches the registry, needs admin for the HKLM allow-list step, and writes a managed UTF-8/OMP block into $PROFILE. Windows Terminal does not need this. Enable with the -ConsoleFont switch on Setup-Workstation.ps1, or set enabled:true here.",
+        "enabled": false,
+        "nerdFont": "Cascadia Code NF",
+        "installOhMyPosh": true,
+        "_winget": ["Microsoft.CascadiaCode (ships the 'Cascadia Code NF' Nerd Font)", "JanDeDobbeleer.OhMyPosh"]
+    },
+
     "moduleInstaller": {
         "_note": "After the workstation layer is set up, Setup-Workstation.ps1 invokes the PowerShell module installer in this same repo.",
-        "script": "Install-ModulesSimple-v2.ps1",
+        "script": "Install-ModulesSimple-v3.ps1",
         "profile": "devworkstation",
         "silent": true
     },
