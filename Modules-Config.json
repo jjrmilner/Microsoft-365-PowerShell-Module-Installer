@@ -1,8 +1,9 @@
 {
-    "_comment": "Microsoft 365 PowerShell Module Configuration - ISO 27001 Evidence Collection",
-    "_instructions": "Set 'enabled': false to disable a service area or individual module",
-    "_version": "2.1-ISO27001",
-    "_changes": "Enabled modules required for ISO 27001:2022 A.8.x evidence collection",
+    "_comment": "Microsoft 365 PowerShell Module Configuration - ISO 27001 Evidence Collection + dev profiles",
+    "_instructions": "Set 'enabled': false to disable a service area or individual module. Profiles select which services install.",
+    "_version": "2.2",
+    "_changes": "(1) ALL Microsoft.Graph.* unified to 'latest' to stop assembly-load version skew. (2) Added 'devworkstation' profile. (3) Added Az.ContainerRegistry; trimmed rarely-used Az.* to enabled:false. (4) Enabled Microsoft.Graph.Applications. (5) Disabled archived MSAL.PS. (6) Added PSReadLine/Posh-Git for dev shells. NON-PowerShell workstation setup (winget/VSCode/env) lives in the separate workstation-setup repo, NOT here.",
+    "_graphVersionNote": "Microsoft.Graph.* sub-modules MUST all be the same version or you get 'Assembly with same name is already loaded'. Keep them ALL 'latest' OR ALL pinned to one identical version. Never mix.",
     "services": {
         "authentication": {
             "name": "Authentication & Core",
@@ -11,16 +12,17 @@
             "priority": 1,
             "modules": {
                 "Microsoft.Graph.Authentication": {
-                    "version": "2.0.0",
+                    "version": "latest",
                     "description": "Microsoft Graph authentication - required for all Graph operations",
                     "enabled": true,
                     "required": true,
-                    "_iso27001": "Required for all collection scripts"
+                    "_note": "CHANGED 2.0.0 -> latest to match sibling Graph modules"
                 },
                 "MSAL.PS": {
                     "version": "4.37.0.0",
                     "description": "Microsoft Authentication Library for advanced auth scenarios",
-                    "enabled": true
+                    "enabled": false,
+                    "_note": "DISABLED: MSAL.PS is archived/unmaintained by Microsoft. Prefer Microsoft.Graph.Authentication or the MSAL.NET assembly shipped with Az.Accounts. Re-enable only if a legacy script imports it."
                 }
             }
         },
@@ -31,33 +33,30 @@
             "priority": 2,
             "modules": {
                 "Microsoft.Graph.Users": {
-                    "version": "2.0.0",
+                    "version": "latest",
                     "description": "User account management and properties",
-                    "enabled": true,
-                    "_iso27001": "Required for A.8.5 (Secure Authentication)"
+                    "enabled": true
                 },
                 "Microsoft.Graph.Groups": {
-                    "version": "2.0.0",
+                    "version": "latest",
                     "description": "Group management (Microsoft 365, Security, Distribution)",
-                    "enabled": true,
-                    "_iso27001": "Required for A.8.5 (Secure Authentication)"
+                    "enabled": true
                 },
                 "Microsoft.Graph.Identity.DirectoryManagement": {
-                    "version": "2.0.0",
+                    "version": "latest",
                     "description": "Directory roles, administrative units, domains",
-                    "enabled": true,
-                    "_iso27001": "CHANGED: Was false - Required for A.8.2 (Privileged Access Rights)"
+                    "enabled": true
                 },
                 "Microsoft.Graph.Identity.Governance": {
                     "version": "latest",
-                    "description": "Identity governance: access reviews, entitlement management, lifecycle workflows",
-                    "enabled": true,
-                    "_iso27001": "CHANGED: Was false - Required for A.8.2 (Privileged Access Rights - PIM, Access Reviews)"
+                    "description": "Identity governance: access reviews, entitlement management, PIM",
+                    "enabled": true
                 },
                 "Microsoft.Graph.Applications": {
-                    "version": "2.0.0",
+                    "version": "latest",
                     "description": "App registrations, service principals, enterprise apps",
-                    "enabled": false
+                    "enabled": true,
+                    "_note": "ENABLED: app-registration / service-principal management is core to managing the agent app regs."
                 }
             }
         },
@@ -69,7 +68,7 @@
             "modules": {
                 "ExchangeOnlineManagement": {
                     "version": "latest",
-                    "description": "Exchange Online administration (mailboxes, mail flow, compliance)",
+                    "description": "Exchange Online administration (mailboxes, mail flow, compliance, IPPS)",
                     "enabled": true
                 }
             }
@@ -100,7 +99,7 @@
             "modules": {
                 "PnP.PowerShell": {
                     "version": "latest",
-                    "description": "Modern SharePoint administration (recommended)",
+                    "description": "Modern SharePoint administration (recommended). NOTE: 2.x requires PS7 and its own Entra app registration for app-only auth.",
                     "enabled": true
                 },
                 "Microsoft.Graph.Sites": {
@@ -110,7 +109,7 @@
                 },
                 "Microsoft.Online.SharePoint.PowerShell": {
                     "version": "latest",
-                    "description": "Classic SharePoint Online management (legacy)",
+                    "description": "Classic SharePoint Online management (legacy, Windows PowerShell only)",
                     "enabled": false
                 }
             }
@@ -119,15 +118,12 @@
             "name": "Device & Endpoint Management",
             "description": "Intune device management and compliance",
             "enabled": true,
-            "priority": 5.5,
-            "_iso27001": "NEW SERVICE: Required for device-related controls",
+            "priority": 6,
             "modules": {
                 "Microsoft.Graph.DeviceManagement": {
                     "version": "latest",
                     "description": "Intune device management, compliance policies, configuration profiles",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.1 (User Endpoint Devices) and A.8.7 (Protection Against Malware)"
+                    "enabled": true
                 }
             }
         },
@@ -135,34 +131,25 @@
             "name": "Security & Compliance",
             "description": "Security alerts, policies, and compliance features",
             "enabled": true,
-            "priority": 6,
-            "_iso27001": "CHANGED: Was false - Required for multiple controls",
+            "priority": 7,
             "modules": {
                 "Microsoft.Graph.Security": {
                     "version": "latest",
                     "description": "Security alerts, incidents, and threat intelligence",
-                    "enabled": true,
-                    "_iso27001": "Required for A.8.7 (Protection Against Malware)"
+                    "enabled": true
                 },
                 "Microsoft.Graph.Identity.SignIns": {
                     "version": "latest",
                     "description": "Sign-in logs, conditional access, risk events",
-                    "enabled": true,
-                    "_iso27001": "Required for A.8.3 (Information Access Restriction) and A.8.5 (Secure Authentication)"
-                },
-                "Microsoft.Graph.Identity.Governance": {
-                    "version": "latest",
-                    "description": "Privileged Identity Management (PIM), access reviews",
-                    "enabled": true,
-                    "_iso27001": "Duplicate of identity.governance - ensure one is enabled"
+                    "enabled": true
                 }
             }
         },
         "reporting": {
             "name": "Reporting & Analytics",
-            "description": "Usage reports, analytics, and data visualization",
+            "description": "Usage reports, analytics, and document generation",
             "enabled": true,
-            "priority": 7,
+            "priority": 8,
             "modules": {
                 "Microsoft.Graph.Reports": {
                     "version": "latest",
@@ -171,15 +158,13 @@
                 },
                 "ImportExcel": {
                     "version": "latest",
-                    "description": "Excel file creation and manipulation",
-                    "enabled": true,
-                    "_iso27001": "Required for configuration file reading (ISO27001-Control-Metadata.xlsx)"
+                    "description": "Excel file creation and manipulation (no Excel install needed)",
+                    "enabled": true
                 },
                 "PSWriteOffice": {
                     "version": "latest",
-                    "description": "Word document generation and manipulation",
-                    "enabled": true,
-                    "_iso27001": "Optional - for future reporting enhancements"
+                    "description": "Word/Excel document generation",
+                    "enabled": false
                 },
                 "PSWriteHTML": {
                     "version": "latest",
@@ -192,7 +177,7 @@
             "name": "Power Platform",
             "description": "Power Apps, Power Automate, Power BI administration",
             "enabled": false,
-            "priority": 8,
+            "priority": 9,
             "modules": {
                 "Microsoft.PowerApps.Administration.PowerShell": {
                     "version": "latest",
@@ -203,122 +188,84 @@
                     "version": "latest",
                     "description": "Power Apps development and management tools",
                     "enabled": true
-                },
-                "Microsoft.Xrm.Data.PowerShell": {
-                    "version": "latest",
-                    "description": "Dataverse (Common Data Service) data operations",
-                    "enabled": true
                 }
             }
         },
         "azure": {
             "name": "Azure Integration",
-            "description": "Azure services that integrate with Microsoft 365",
+            "description": "Azure services that integrate with Microsoft 365 / GMS agents",
             "enabled": true,
-            "priority": 9,
-            "_iso27001": "CHANGED: Was false - Required for A.5.7 (Sentinel), A.8.6 (Capacity), A.8.9 (Configuration), A.8.13 (Backup)",
+            "priority": 10,
             "modules": {
                 "Az.Accounts": {
                     "version": "latest",
                     "description": "Azure authentication and subscription context",
                     "enabled": true,
-                    "required": true,
-                    "_iso27001": "Required for all Azure operations"
+                    "required": true
                 },
                 "Az.Resources": {
                     "version": "latest",
                     "description": "Azure resource management (resource groups, deployments)",
-                    "enabled": true,
-                    "_iso27001": "Required for A.8.9 (Configuration Management)"
+                    "enabled": true
                 },
                 "Az.Storage": {
                     "version": "latest",
-                    "description": "Azure Storage (blobs, files, queues, tables)",
-                    "enabled": true,
-                    "_iso27001": "Required for A.8.13 (Information Backup)"
+                    "description": "Azure Storage (blobs, files, queues, tables, Terraform state)",
+                    "enabled": true
                 },
                 "Az.KeyVault": {
                     "version": "latest",
-                    "description": "Azure Key Vault for secrets and certificate management",
+                    "description": "Azure Key Vault for secrets and certificate management (BTG auth)",
+                    "enabled": true
+                },
+                "Az.ContainerRegistry": {
+                    "version": "latest",
+                    "description": "ACR push/pull/import for the container-app release flow",
                     "enabled": true,
-                    "_iso27001": "Required for BTG authentication credentials"
+                    "_note": "ADDED: present on the current workstation, used by the ops release/ACR workflows."
                 },
                 "Az.Monitor": {
                     "version": "latest",
-                    "description": "Azure Monitor for logging and alerting",
-                    "enabled": true,
-                    "_iso27001": "CHANGED: Was false - Required for A.5.7 (Threat Intelligence)"
-                },
-                "Az.Compute": {
-                    "version": "latest",
-                    "description": "Azure virtual machine management",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.6 (Capacity Management)"
-                },
-                "Az.Network": {
-                    "version": "latest",
-                    "description": "Azure network management (VNets, NSGs, firewalls)",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
+                    "description": "Azure Monitor / Log Analytics queries",
+                    "enabled": true
                 },
                 "Az.OperationalInsights": {
                     "version": "latest",
-                    "description": "Azure Sentinel workspace management",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.5.7 (Threat Intelligence - Sentinel)"
+                    "description": "Log Analytics / Sentinel workspace management",
+                    "enabled": true
                 },
                 "Az.SecurityInsights": {
                     "version": "latest",
-                    "description": "Azure Sentinel security operations",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.5.7 (Threat Intelligence - Sentinel)"
+                    "description": "Microsoft Sentinel security operations",
+                    "enabled": false
                 },
                 "Az.Sql": {
                     "version": "latest",
                     "description": "Azure SQL database management",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.13 (Information Backup)"
+                    "enabled": false
                 },
                 "Az.RecoveryServices": {
                     "version": "latest",
                     "description": "Azure backup and recovery services",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.13 (Information Backup)"
+                    "enabled": false
                 },
-                "Az.Cdn": {
+                "Az.Network": {
                     "version": "latest",
-                    "description": "Azure CDN management",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
+                    "description": "Azure network management (VNets, NSGs, firewalls)",
+                    "enabled": false
                 },
-                "Az.FrontDoor": {
+                "Az.Compute": {
                     "version": "latest",
-                    "description": "Azure Front Door management",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
-                },
-                "Az.TrafficManager": {
-                    "version": "latest",
-                    "description": "Azure Traffic Manager management",
-                    "enabled": true,
-                    "required": true,
-                    "_iso27001": "NEW MODULE: Required for A.8.20 (Network Security)"
+                    "description": "Azure virtual machine management",
+                    "enabled": false
                 }
             }
         },
         "development": {
             "name": "Development & Automation",
-            "description": "Tools for PowerShell development and CI/CD",
-            "enabled": false,
-            "priority": 10,
+            "description": "Tools for PowerShell development, testing and CI/CD",
+            "enabled": true,
+            "priority": 11,
             "modules": {
                 "PSScriptAnalyzer": {
                     "version": "latest",
@@ -327,20 +274,25 @@
                 },
                 "Pester": {
                     "version": "5.7.1",
-                    "description": "PowerShell testing framework (v5.7.1+ required - NOT compatible with v3.4.0)",
+                    "description": "PowerShell testing framework (v5.x required - NOT compatible with the v3.4.0 shipped with Windows PowerShell)",
                     "enabled": true,
                     "required": true,
-                    "_iso27001": "CRITICAL: Must be v5.7.1+ for test suite. Uninstall old versions first: Uninstall-Module Pester -AllVersions"
+                    "_note": "The Windows-shipped Pester 3.4.0 lives in AllUsers scope and CANNOT be removed from CurrentUser scope; import the explicit version: Import-Module Pester -RequiredVersion 5.7.1"
+                },
+                "PSReadLine": {
+                    "version": "latest",
+                    "description": "Command-line editing, history and prediction for the PS7 console",
+                    "enabled": true
+                },
+                "platyPS": {
+                    "version": "latest",
+                    "description": "Generate PowerShell help/markdown docs",
+                    "enabled": false
                 },
                 "Posh-Git": {
                     "version": "latest",
-                    "description": "Git integration for PowerShell (enhanced prompt and tab completion)",
-                    "enabled": false
-                },
-                "PSWriteColor": {
-                    "version": "latest",
-                    "description": "Enhanced console output with colors",
-                    "enabled": false
+                    "description": "Git integration for PowerShell (prompt + tab completion)",
+                    "enabled": true
                 }
             }
         }
@@ -349,82 +301,33 @@
         "basic": {
             "name": "Basic Administrator",
             "description": "Essential modules for day-to-day Microsoft 365 administration",
-            "services": [
-                "authentication",
-                "identity",
-                "exchange",
-                "teams",
-                "sharepoint",
-                "reporting"
-            ]
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "reporting"]
         },
         "security": {
             "name": "Security Administrator",
             "description": "Core modules plus security and compliance tools",
-            "services": [
-                "authentication",
-                "identity",
-                "exchange",
-                "teams",
-                "sharepoint",
-                "security",
-                "reporting"
-            ]
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "security", "reporting"]
         },
         "iso27001": {
             "name": "ISO 27001 Evidence Collection",
             "description": "All modules required for ISO 27001:2022 Annex A.8.x evidence collection",
-            "services": [
-                "authentication",
-                "identity",
-                "exchange",
-                "devicemanagement",
-                "security",
-                "azure",
-                "development",
-                "reporting"
-            ],
-            "_comment": "Optimized profile for running ISO 27001 collection scripts. Includes Azure modules for A.5.7, A.8.6, A.8.9, A.8.13, A.8.20. Pester v5.7.1+ required for test suite."
+            "services": ["authentication", "identity", "exchange", "devicemanagement", "security", "azure", "development", "reporting"]
         },
-        "power": {
-            "name": "Power Platform Administrator",
-            "description": "Core modules plus Power Platform administration",
-            "services": [
-                "authentication",
-                "identity",
-                "powerplatform",
-                "reporting"
-            ]
+        "devworkstation": {
+            "name": "GMS Developer Workstation (PowerShell layer only)",
+            "description": "PowerShell modules for managing the GMS GHE repos: Graph + Exchange/IPPS + Azure (KV/ACR/Storage/Monitor) + dev/test tooling. The non-PowerShell layer (winget tools, VS Code, git/gh/env, Claude config) is handled by the separate workstation-setup repo, which calls this script with -Profile devworkstation.",
+            "services": ["authentication", "identity", "exchange", "azure", "development", "reporting"],
+            "_comment": "Lean profile. Does NOT install Intune/Teams/SharePoint/Power Platform by default - add them to this array if a given repo needs them."
         },
         "developer": {
             "name": "Developer/Automation",
             "description": "Core modules plus development and automation tools",
-            "services": [
-                "authentication",
-                "identity",
-                "exchange",
-                "teams",
-                "sharepoint",
-                "development",
-                "reporting"
-            ]
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "development", "reporting"]
         },
         "enterprise": {
             "name": "Enterprise Administrator",
             "description": "All modules for comprehensive Microsoft 365 and Azure management",
-            "services": [
-                "authentication",
-                "identity",
-                "exchange",
-                "teams",
-                "sharepoint",
-                "devicemanagement",
-                "security",
-                "powerplatform",
-                "azure",
-                "development",
-                "reporting"
-            ]
+            "services": ["authentication", "identity", "exchange", "teams", "sharepoint", "devicemanagement", "security", "powerplatform", "azure", "development", "reporting"]
         }
     },
     "settings": {
@@ -433,7 +336,6 @@
         "autoUpdateModules": false,
         "skipVersionCheck": false,
         "pauseBetweenBatches": false,
-        "showDetailedProgress": true,
-        "_iso27001_comment": "Default profile changed to 'iso27001' for evidence collection workflow"
+        "showDetailedProgress": true
     }
 }

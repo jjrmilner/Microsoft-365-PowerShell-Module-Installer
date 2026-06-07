@@ -1,431 +1,172 @@
 # Microsoft 365 PowerShell Module Installer - Service-Based Architecture
 
-## Overview
+A scalable, JSON-driven installer for Microsoft 365 / Azure PowerShell modules, organised by the
+service each module manages (Authentication, Identity, Exchange, Teams, SharePoint, Security,
+Reporting, Power Platform, Azure, Development). v3 also bootstraps a full developer workstation
+(dev tools + VS Code extensions + environment) via an optional menu option / switch.
 
-This installer uses a scalable, service-based organisation that mirrors how Microsoft 365 services are actually structured. Instead of arbitrary categories, modules are organised by the services they manage, making it intuitive and future-proof.
+> **v3 is the current entry point:** `Install-ModulesSimple-v3.ps1`. The older `Install-ModulesSimple.ps1`
+> and `Install-ModulesSimple-v2.ps1` are retained for reference.
 
-## Scalable Architecture Benefits
+---
 
-### Service-Based Organisation
-Modules are grouped by the Microsoft 365 service they manage:
-- **Authentication** - Core authentication modules
-- **Identity** - User and directory management  
-- **Exchange** - Email and calendar administration
-- **Teams** - Microsoft Teams management
-- **SharePoint** - SharePoint Online administration
-- **Security** - Security alerts and compliance
-- **Reporting** - Analytics and data visualization
-- **Power Platform** - Power Apps, Automate, BI
-- **Azure** - Azure service integration
-- **Development** - Development and automation tools
+## What's in this repo
 
-### Priority-Based Installation
-Services are installed in logical order based on dependencies:
-1. Authentication (required first)
-2. Identity (users/groups)
-3. Core services (Exchange, Teams, SharePoint)
-4. Specialised services (Security, Power Platform)
+| File | Purpose |
+|------|---------|
+| `Install-ModulesSimple-v3.ps1` | **Current** module installer (interactive menu, profiles, silent mode, workstation option) |
+| `Modules-Config.json` | Module catalogue: services, modules, profiles, settings |
+| `Setup-Workstation.ps1` | Workstation bootstrap: winget tools + VS Code extensions + git/gh/env, then the module installer |
+| `workstation-config.json` | Workstation manifest (winget IDs, VS Code extension IDs, environment) - **no secrets** |
+| `workstation.local.json` | *Optional, git-ignored* - your machine/org overrides (git identity, enterprise host) |
+| `Install-ModulesSimple-v2.ps1`, `Install-ModulesSimple.ps1` | Previous versions (reference) |
+| `Intune Deployment Guide.md` | Legacy silent-mode notes for MDM/Intune |
 
-### Predefined Profiles
-Common combinations for different admin roles:
-
-| Profile | Services Included | Use Case |
-|---------|------------------|----------|
-| `basic` | Authentication, Identity, Exchange, Teams, SharePoint, Reporting | Day-to-day M365 admin |
-| `security` | Basic + Security/Compliance | Security administrator |
-| `power` | Authentication, Identity, Power Platform, Reporting | Power Platform admin |
-| `developer` | Basic + Development tools | Script development |
-| `enterprise` | All services | Full enterprise admin |
+---
 
 ## Quick Start
 
-### Interactive Menu (Recommended for New Users)
+### Interactive menu (recommended)
 ```powershell
-.\Install-ModulesSimple.ps1
+.\Install-ModulesSimple-v3.ps1
 ```
-When run without parameters, the script displays an interactive menu:
-```
-================================================================================
-   MICROSOFT 365 POWERSHELL MODULE INSTALLER
-            Select Installation Profile
-================================================================================
+The menu lists every profile defined in `Modules-Config.json`, plus **Custom Configuration**,
+**Workstation Setup**, **Remove All Modules**, and **Exit**.
 
-  [1] Basic Administrator
-      Essential modules for day-to-day Microsoft 365 administration
-      Services: 6 (authentication, identity, exchange, teams, SharePoint, reporting)
-      Modules: ~10 modules will be installed
-
-  [2] Security Administrator  
-      Core modules plus security and compliance tools
-      Services: 7 (authentication, identity, exchange, teams, SharePoint, security, reporting)
-      Modules: ~13 modules will be installed.
-
-  [3] Power Platform Administrator
-      Core modules plus Power Platform administration
-      Services: 4 (authentication, identity, Power Platform, reporting)
-      Modules: ~8 modules will be installed
-
-  [4] Developer/Automation
-      Core modules plus development and automation tools
-      Services: 7 (authentication, identity, exchange, teams, SharePoint, development, reporting)
-      Modules: ~13 modules will be installed
-
-  [5] Enterprise Administrator
-      All modules for comprehensive Microsoft 365 and Azure management
-      Services: 10 (all services)
-      Modules: ~25 modules will be installed
-
-  [6] Custom Configuration
-      Use your customised JSON configuration settings
-      Services: Based on 'enabled' settings in modules-config.json
-
-  [7] Exit
-      Cancel installation and exit
-
-Select an option [1-7]:
-```
-
-### Direct Profile Usage (Advanced Users)
+### Direct profile
 ```powershell
-# Basic Microsoft 365 administration
-.\Install-ModulesSimple.ps1 -Profile basic
-
-# Security administrator
-.\Install-ModulesSimple.ps1 -Profile security
-
-# Power Platform administrator  
-.\Install-ModulesSimple.ps1 -Profile power
-
-# Full enterprise setup
-.\Install-ModulesSimple.ps1 -Profile enterprise
+.\Install-ModulesSimple-v3.ps1 -Profile security
+.\Install-ModulesSimple-v3.ps1 -Profile iso27001
+.\Install-ModulesSimple-v3.ps1 -Profile devworkstation
 ```
 
-### Custom Service Selection
+### Specific services only
 ```powershell
-# Only authentication and identity
-.\Install-ModulesSimple.ps1 -EnableServices "authentication,identity"
-
-# Exchange and Teams only
-.\Install-ModulesSimple.ps1 -EnableServices "authentication,exchange,teams"
+.\Install-ModulesSimple-v3.ps1 -EnableServices "authentication,identity,exchange"
 ```
 
-### Silent Mode (Intune Deployment)
+### Silent (automation)
 ```powershell
-# Automated deployment - no user interaction
-.\Install-ModulesSimple.ps1 -Silent
-
-# Silent with specific profile
-.\Install-ModulesSimple.ps1 -Silent -Profile basic
-
-# Silent with force reinstall
-.\Install-ModulesSimple.ps1 -Silent -Force
+.\Install-ModulesSimple-v3.ps1 -Silent                 # installs settings.defaultProfile
+.\Install-ModulesSimple-v3.ps1 -Silent -Profile basic  # explicit profile wins
 ```
 
-**Silent Mode Features:**
-- Automatically upgrades to PowerShell 7 if available
-- Uses enterprise profile by default (all modules)
-- No interactive menus or prompts
-- Suitable for Intune/automated deployment
-- Returns proper exit codes for monitoring
-
-## Parameters Reference
-
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `-ConfigFile` | Path to JSON configuration file | `-ConfigFile "custom-config.json"` |
-| `-EnableServices` | Comma-separated services to install | `-EnableServices "authentication,identity"` |
-| `-Profile` | Predefined profile to use | `-Profile security` |
-| `-Force` | Force reinstall existing modules | `-Force` |
-| `-Interactive` | Show confirmation before installation | `-Interactive` |
-| `-FixGraphVersions` | Fix Microsoft Graph version conflicts | `-FixGraphVersions` |
-| `-Silent` | Automated deployment mode (no prompts) | `-Silent` |
-
-## Service Details
-
-### 🔐 Authentication & Core
-**Essential for all Microsoft 365 operations**
-- Microsoft.Graph.Authentication (required)
-- MSAL.PS (advanced authentication scenarios)
-
-### 👥 Identity & Directory Management  
-**User, group, and directory administration**
-- Microsoft.Graph.Users (user management)
-- Microsoft.Graph.Groups (group management)
-- Microsoft.Graph.Identity.DirectoryManagement (directory roles)
-- Microsoft.Graph.Applications (app registrations)
-
-### 📧 Exchange Online
-**Email, calendar, and Exchange administration**
-- ExchangeOnlineManagement (complete Exchange management)
-
-### 💬 Microsoft Teams
-**Teams administration and management**
-- MicrosoftTeams (Teams admin module)
-- Microsoft.Graph.Teams (Graph API access)
-
-### 🌐 SharePoint Online
-**SharePoint sites, lists, and content management**
-- PnP.PowerShell (modern, recommended)
-- Microsoft.Graph.Sites (Graph API access)
-- Microsoft.Online.SharePoint.PowerShell (legacy)
-
-### 🔒 Security & Compliance
-**Security alerts, policies, and compliance features**
-- Microsoft.Graph.Security (security center)
-- Microsoft.Graph.Identity.SignIns (conditional access)
-- Microsoft.Graph.Identity.Governance (PIM, access reviews)
-
-### 📊 Reporting & Analytics
-**Usage reports, analytics, and data visualisation**
-- Microsoft.Graph.Reports (M365 usage reports)
-- ImportExcel (Excel file manipulation)
-- PSWriteWord (Word document generation)
-- PSWriteHTML (HTML report generation)
-
-### ⚡ Power Platform
-**Power Apps, Power Automate, Power BI administration**
-- Microsoft.PowerApps.Administration.PowerShell
-- Microsoft.PowerApps.PowerShell
-- Microsoft.Xrm.Data.PowerShell (Dataverse)
-
-### ☁️ Azure Integration
-**Azure services that integrate with Microsoft 365**
-- Az.Accounts (Azure authentication)
-- Az.Resources (resource management)
-- Az.Storage (storage services)
-- Az.KeyVault (secret management)
-
-### 🛠️ Development & Automation
-**Tools for PowerShell development and CI/CD**
-- PSScriptAnalyzer (code quality)
-- Pester (testing framework)
-- Posh-Git (Git integration)
-
-## Configuration Customisation
-
-### Version Management Strategies
-
-The configuration uses a **balanced approach** that optimises for both stability and security:
-
-**Core Modules (Pinned for Stability):**
-```json
-"Microsoft.Graph.Authentication": {
-    "version": "2.0.0",  // Core authentication - stability critical
-    "description": "Required for all Graph operations",
-    "enabled": true,
-    "required": true
-},
-"Microsoft.Graph.Users": {
-    "version": "2.0.0",  // Essential identity management
-    "description": "User account management and properties",
-    "enabled": true
-}
-```
-
-**Peripheral Modules (Latest for Updates):**
-```json
-"ExchangeOnlineManagement": {
-    "version": "latest",  // Service-specific modules benefit from updates
-    "description": "Exchange Online administration",
-    "enabled": true
-},
-"Microsoft.Graph.Security": {
-    "version": "latest",  // Security modules need the latest threat intelligence
-    "description": "Security alerts and incidents",
-    "enabled": true
-}
-```
-
-**Utility Modules (Latest for Features):**
-```json
-"ImportExcel": {
-    "version": "latest",  // Utility modules - new features rarely break
-    "description": "Excel file manipulation",
-    "enabled": true
-}
-```
-
-**Balanced Approach Rationale:**
-- **Pin core modules** (Authentication, Users, Groups) for environment stability
-- **Use "latest" for service modules** (Exchange, Teams, SharePoint) to get improvements
-- **Use "latest" for security modules** to get threat intelligence updates
-- **Use "latest" for utility modules** (Excel, Word) for new features and bug fixes
-
-**Version Update Behaviour:**
-- **Pinned modules**: Only update when you change the version number in JSON
-- **"Latest" modules**: Automatically update when newer versions are available
-- **Mixed versions**: Some modules update while core stability is maintained
-
-### Enable/Disable Entire Services
-```json
-"teams": {
-    "enabled": false,    // Disable all Teams modules
-    "modules": { ... }
-}
-```
-
-### Enable/Disable Individual Modules
-```json
-"Microsoft.Graph.Teams": {
-    "enabled": false,    // Keep Teams admin but disable Graph API
-    "version": "2.0.0"
-}
-```
-
-### Create Custom Profiles
-```json
-"profiles": {
-    "custom_team": {
-        "name": "My Team Setup",
-        "description": "Custom modules for our team",
-        "services": ["authentication", "exchange", "reporting"]
-    }
-}
-```
-
-### Add New Services
-```json
-"newservice": {
-    "name": "New Microsoft Service",
-    "description": "Newly released service modules",
-    "enabled": false,
-    "priority": 11,
-    "modules": {
-        "Microsoft.NewService.PowerShell": {
-            "version": "1.0.0",
-            "enabled": true
-        }
-    }
-}
-```
-
-## Scalability Features
-
-### Easy Extension
-- **New Microsoft services** → Add new service section
-- **Service updates** → Update modules within existing services
-- **Version management** → Update versions without structural changes
-
-### Logical Organisation
-- **Service-aligned** → Modules grouped by actual Microsoft 365 services
-- **Dependency-aware** → Priority-based installation order
-- **Role-based** → Profiles match real administrative roles
-
-### Maintenance Benefits
-- **Clear ownership** → Each service section has a clear purpose
-- **Future-proof** → Structure adapts to new Microsoft services
-- **Documentation** → Each module includes a purpose and description
-
-## Intune/Enterprise Deployment
-
-The script includes a Silent mode specifically designed for automated deployment through Microsoft Intune or other enterprise management tools.
-
-### Basic Intune Deployment
+### Full developer workstation
 ```powershell
-.\Install-ModulesSimple.ps1 -Silent
+.\Install-ModulesSimple-v3.ps1 -Workstation
+# or run the bootstrap directly:
+.\Setup-Workstation.ps1
 ```
-
-**Features:**
-- **Zero user interaction** - Fully automated execution
-- **Automatic PowerShell 7 upgrade** - Detects and upgrades without prompts
-- **Enterprise profile default** - Installs comprehensive module set (~21 modules)
-- **Proper exit codes** - For deployment monitoring and reporting
-- **Error resilience** - Continues on individual module failures
-
-### Intune Configuration Requirements
-- **Run using logged-on credentials**: Yes
-- **Enforce script signature check**: No
-- **Run in 64-bit PowerShell**: Yes
-
-### Files Required for Intune Package
-1. `Install-ModulesSimple.ps1` (main script)
-2. `modules-config.json` (configuration file)
-
-### Alternative Silent Commands
-```powershell
-# Minimal installation
-.\Install-ModulesSimple.ps1 -Silent -Profile basic
-
-# Security-focused installation  
-.\Install-ModulesSimple.ps1 -Silent -Profile security
-
-# Force reinstall for troubleshooting
-.\Install-ModulesSimple.ps1 -Silent -Force
-```
-
-For detailed Intune deployment instructions, see `Intune-Deployment-Guide.md`.
-
-## Migration Guide
-
-### From Parameter-Based Script
-| Old Method | New Method |
-|------------|------------|
-| `-IncludeEnterprise` | `-Profile enterprise` |
-| `-IncludePowerPlatform` | `-EnableServices "powerplatform"` |
-| `-IncludeAll` | `-Profile enterprise` |
-| Multiple parameters | Single profile parameter |
-
-### From Category-Based Config
-| Old Category | New Services |
-|--------------|--------------|
-| `core` | `authentication`, `identity`, `exchange`, `teams`, `sharepoint` |
-| `enterprise` | `security` |
-| `powerplatform` | `powerplatform` |
-| `azure` | `azure` |
-| `devops` | `development` |
-
-## Best Practices
-
-### Starting Points
-- **New to M365**: Use `-Profile basic`
-- **Security focus**: Use `-Profile security`  
-- **Power Platform**: Use `-Profile power`
-- **Custom needs**: Create custom profile in JSON
-
-### Maintenance
-- **Version updates**: Update version numbers in JSON
-- **New modules**: Add to appropriate service section
-- **Deprecations**: Set `"enabled": false` instead of deleting
-
-### Development
-- **Testing**: Use `-Interactive` to preview changes
-- **Automation**: Use profiles in scripts and CI/CD
-- **Documentation**: Leverage built-in descriptions
-
-This service-based architecture makes the system much more maintainable and scales naturally with Microsoft's service evolution.
 
 ---
 
-## 📄 **License:** Apache 2.0 (see LICENSE)  
-**Additional restriction:** Commons Clause (see COMMONS-CLAUSE.txt)
+## Profiles
 
-**SPDX headers**
-- Each source file includes:  
-  `SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause`
+| Profile | Services | Use case |
+|---------|----------|----------|
+| `basic` | auth, identity, exchange, teams, sharepoint, reporting | Day-to-day M365 admin |
+| `security` | basic + security | Security administrator |
+| `iso27001` | auth, identity, exchange, devicemanagement, security, azure, development, reporting | ISO 27001 evidence collection |
+| `devworkstation` | auth, identity, exchange, azure, development, reporting | **Developer workstation (PowerShell layer)** |
+| `developer` | basic + development | Script development |
+| `enterprise` | all services | Full M365 + Azure |
+
+Valid profiles are read **from the config** at runtime - add your own under `profiles` and it appears
+in the menu and `-Profile` automatically.
 
 ---
+
+## Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `-ConfigFile` | Path to the JSON config (default `modules-config.json`) |
+| `-EnableServices` | Comma-separated service names (overrides profile) |
+| `-Profile` (alias of `-InstallProfile`) | Profile to install; valid values come from the config |
+| `-Force` | Reinstall even if present |
+| `-Interactive` | Confirm before installing |
+| `-FixGraphVersions` | Surface Graph version-conflict guidance |
+| `-Silent` | No prompts; auto-upgrades to PS7; uses `settings.defaultProfile` |
+| `-Workstation` | Run the workstation bootstrap instead of installing modules |
+
+---
+
+## Configuration (`Modules-Config.json`)
+
+Enable/disable a whole service or an individual module with `"enabled": true|false`. Pin a version
+or use `"latest"`.
+
+> **Microsoft Graph version rule:** every `Microsoft.Graph.*` sub-module **must** be on the *same*
+> version, or PowerShell throws *"Assembly with same name is already loaded"* on import. Keep them
+> **all** `"latest"` **or all** pinned to one identical version - never mix. (v3's config ships them
+> all on `"latest"`.)
+
+`settings` block (now honoured by v3):
+
+| Setting | Effect |
+|---------|--------|
+| `defaultProfile` | Profile used by `-Silent` when no `-Profile` is given |
+| `defaultScope` | `CurrentUser` (default) or `AllUsers` (falls back to CurrentUser if not elevated) |
+| `skipVersionCheck` | Skip the `Find-Module` "is there a newer version" check for `latest` modules |
+
+---
+
+## Workstation Setup (the non-PowerShell layer)
+
+`Setup-Workstation.ps1` reads `workstation-config.json` and is **idempotent** (re-running skips what's
+already present). It installs:
+
+- **winget tools:** Git, Git LFS, GitHub CLI, PowerShell 7, .NET SDK, Node.js LTS, Python, Terraform,
+  Azure CLI, VS Code (Functions Core Tools / Bicep / Docker optional).
+- **VS Code extensions:** the functional set for .NET / Python / PowerShell / Azure / GitHub / Playwright work.
+- **Environment:** PSGallery trust, execution policy, `git` identity + `git lfs install`,
+  GitHub CLI host, optional `GH_HOST`.
+- Then runs `Install-ModulesSimple-v3.ps1 -Profile devworkstation -Silent`.
+
+> **Claude Code** is not a winget package - after Node installs:
+> `npm install -g @anthropic-ai/claude-code` (or `irm https://claude.ai/install.ps1 | iex`).
+
+### No secrets in this repo
+`workstation-config.json` ships generic placeholders. Put your machine/org specifics (git identity,
+enterprise GitHub host) in **`workstation.local.json`** - it's git-ignored. Credentials are never
+stored here: `gh auth login`, `claude login`, `az login`, and any auth certificate (`.pfx` into
+`Cert:\CurrentUser\My`) are provisioned manually from your own secure store. The bootstrap prints a
+checklist of these at the end.
+
+---
+
+## v3 Changes
+
+- **Bug fix:** valid profiles are read from the config, not a hard-coded list - previously selecting
+  `iso27001`/`devworkstation` (or any non-default profile) from the menu errored with *"Invalid profile"*.
+- `settings.defaultProfile` / `defaultScope` / `skipVersionCheck` are now actually honoured.
+- `-Profile` no longer shadows the `$PROFILE` automatic variable (internal `-InstallProfile`, alias `-Profile`).
+- New **Workstation Setup** menu option and `-Workstation` switch.
+- `-Silent` uses `settings.defaultProfile` (and respects an explicit `-Profile`) instead of hard-coding `enterprise`.
+- TLS 1.2 forced on Windows PowerShell 5.1; module-cleanup wildcard matching fixed; PS7 restart prefers
+  `$PSCommandPath`; stray debug line removed.
+
+---
+
+## License
+
+**Apache 2.0** (see `LICENSE`) with the **Commons Clause** restriction (see `COMMON-CLAUSE.txt`).
+Each source file carries `SPDX-License-Identifier: Apache-2.0 WITH Commons-Clause`.
 
 ### FAQ: MSP and Consulting Use
+**Q: Can an MSP/consultant use this in a paid engagement?**
+- **Allowed:** used internally by the end customer, with the consultant assisting.
+- **Not allowed without a commercial licence:** providing a managed service where the tool runs in the
+  MSP's own environment, or where the value of the service substantially derives from the tool. That
+  meets the Commons Clause definition of "Sell".
 
-**Q: Can an MSP or consultant use this tool in a paid engagement?**  
-**A:** It depends on how the tool is used:  
-- **Allowed:** If the tool is used internally by the end customer (e.g., installed in their tenant) and the consultant is simply assisting, this is generally acceptable.  
-- **Not allowed without a commercial licence:** If the MSP or consultant provides a managed service where the tool runs in their own environment (e.g., their tenant or infrastructure) or if the value of the service substantially derives from the tool’s functionality, this falls under the definition of “Sell” in the Commons Clause and requires a commercial licence.
+**Commercial licence:** licensing@globalmicro.co.za
 
-**Q: Why is this restricted?**  
-The Commons Clause removes the right to “Sell,” which includes providing a service for a fee where the value derives from the software. This ensures fair use and prevents competitors from monetising the tool without contributing back.
-
-**Q: How do I get a commercial licence?**  
-Contact Global Micro Solutions (Pty) Ltd at:  
-📧 licensing@globalmicro.co.za
-
-## ⚠️ Warranty Disclaimer
-
-Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Please review the Apache-2.0 WITH Commons-Clause License for the specific language governing permissions and limitations under the License.
+## Warranty Disclaimer
+Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Apache-2.0 WITH Commons-Clause License for the governing terms.
 
 ## Author
-
-**JJ Milner**  
+**JJ Milner**
 Blog: https://jjrmilner.substack.com
-Github: https://github.com/jjrmilner
-
+GitHub: https://github.com/jjrmilner

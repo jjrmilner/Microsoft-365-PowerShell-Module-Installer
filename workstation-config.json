@@ -1,0 +1,101 @@
+{
+    "_comment": "Developer Workstation Setup - non-PowerShell layer (winget tools, VS Code extensions, environment). Consumed by Setup-Workstation.ps1 / the 'Workstation Setup' menu option. The PowerShell MODULE layer lives in Modules-Config.json.",
+    "_version": "1.0",
+    "_publicSafe": "This file ships in the PUBLIC repo: NO secrets and NO organisation-specific values. Machine/org specifics (GHE host, git identity) come from an OPTIONAL, GIT-IGNORED 'workstation.local.json' that overrides the placeholders below.",
+    "_localOverrideFile": "workstation.local.json",
+
+    "tooling": {
+        "_note": "winget package IDs (verified against the winget community repo). Installed with: winget install -e --id <id> --accept-package-agreements --accept-source-agreements",
+        "winget": [
+            { "id": "Git.Git",                            "enabled": true,  "description": "Git for Windows" },
+            { "id": "GitHub.GitLFS",                      "enabled": true,  "description": "Git LFS" },
+            { "id": "GitHub.cli",                         "enabled": true,  "description": "GitHub CLI (gh)" },
+            { "id": "Microsoft.PowerShell",               "enabled": true,  "description": "PowerShell 7+ (pwsh)" },
+            { "id": "Microsoft.DotNet.SDK.9",             "enabled": true,  "description": ".NET 9 SDK" },
+            { "id": "OpenJS.NodeJS.LTS",                  "enabled": true,  "description": "Node.js LTS + npm" },
+            { "id": "Python.Python.3.13",                 "enabled": true,  "description": "Python 3.13" },
+            { "id": "Hashicorp.Terraform",                "enabled": true,  "description": "Terraform" },
+            { "id": "Microsoft.AzureCLI",                 "enabled": true,  "description": "Azure CLI (az)" },
+            { "id": "Microsoft.VisualStudioCode",         "enabled": true,  "description": "Visual Studio Code" },
+            { "id": "Microsoft.Azure.FunctionsCoreTools", "enabled": false, "description": "Azure Functions Core Tools (optional)" },
+            { "id": "Microsoft.Bicep",                    "enabled": false, "description": "Bicep CLI (optional)" },
+            { "id": "Docker.DockerDesktop",               "enabled": false, "description": "Docker Desktop (optional)" }
+        ],
+        "_postWinget": [
+            "Claude Code is NOT a winget package. After Node installs, run: npm install -g @anthropic-ai/claude-code   (or the native installer: irm https://claude.ai/install.ps1 | iex)"
+        ]
+    },
+
+    "vscodeExtensions": {
+        "_note": "Installed with: code --install-extension <id> --force. Themes / personal-preference extensions intentionally omitted.",
+        "ids": [
+            "anthropic.claude-code",
+            "ms-dotnettools.csdevkit",
+            "ms-dotnettools.csharp",
+            "ms-dotnettools.vscode-dotnet-runtime",
+            "ms-vscode.powershell",
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-python.debugpy",
+            "ms-playwright.playwright",
+            "ms-azuretools.vscode-bicep",
+            "ms-azuretools.vscode-azureresourcegroups",
+            "ms-azuretools.vscode-containers",
+            "ms-vscode-remote.remote-wsl",
+            "github.vscode-github-actions",
+            "github.vscode-pull-request-github",
+            "eamodio.gitlens",
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "ms-vscode.vscode-typescript-next",
+            "usernamehw.errorlens",
+            "streetsidesoftware.code-spell-checker",
+            "yzhang.markdown-all-in-one",
+            "bierner.markdown-preview-github-styles",
+            "mechatroner.rainbow-csv",
+            "grapecity.gc-excelviewer",
+            "zainchen.json"
+        ]
+    },
+
+    "environment": {
+        "git": {
+            "user.name": "<YOUR NAME>",
+            "user.email": "<your.email@example.com>",
+            "init.defaultBranch": "main",
+            "_lfs": "Setup-Workstation.ps1 runs 'git lfs install' automatically once GitHub.GitLFS is present."
+        },
+        "githubCli": {
+            "host": "github.com",
+            "_hostNote": "Override with your enterprise host in workstation.local.json (e.g. 'your-org.ghe.com'). Setup runs: gh auth login --hostname <host> --git-protocol https",
+            "_credentialHelper": "After login, gh wires itself as the git credential helper for that host automatically."
+        },
+        "envVars": {
+            "_note": "Optional convenience env vars (user scope). Empty by default in the public repo.",
+            "GH_HOST": ""
+        },
+        "powershell": {
+            "psGalleryTrust": true,
+            "executionPolicy": "RemoteSigned",
+            "_executionPolicyScope": "CurrentUser"
+        }
+    },
+
+    "moduleInstaller": {
+        "_note": "After the workstation layer is set up, Setup-Workstation.ps1 invokes the PowerShell module installer in this same repo.",
+        "script": "Install-ModulesSimple-v2.ps1",
+        "profile": "devworkstation",
+        "silent": true
+    },
+
+    "secretsChecklist": {
+        "_note": "Printed at the end of setup. These are provisioned MANUALLY from your secure store - NEVER committed to any repo.",
+        "items": [
+            "gh auth login              -> stores its token under the gh config (not in this repo)",
+            "claude login / OAuth       -> stores credentials under ~/.claude (not in this repo)",
+            "App-only auth certificate  -> import the .pfx into Cert:\\CurrentUser\\My from Key Vault / your secure store",
+            "az login                   -> interactive, or your service-principal flow",
+            "MCP server tokens / API keys -> configure locally per tool"
+        ]
+    }
+}

@@ -1,0 +1,15 @@
+# Local, machine/org-specific workstation overrides - NEVER commit (may contain host/identity)
+workstation.local.json
+
+# Logs / transcripts
+*.log
+
+# Secrets / certs (defensive - none should ever be here)
+*.pfx
+*.pem
+*.key
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+.vscode/
