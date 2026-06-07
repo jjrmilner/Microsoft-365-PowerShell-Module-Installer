@@ -41,6 +41,11 @@ param(
     [switch]$SkipOhMyPosh
 )
 
+# Don't let a non-zero winget exit (already-installed / no-applicable-upgrade) become a terminating
+# error under an inherited $ErrorActionPreference='Stop' (PS 7.4+ defaults this preference to $true).
+# These winget calls are deliberately best-effort ("install attempted") and check nothing afterwards.
+$PSNativeCommandUseErrorActionPreference = $false
+
 function Info($m){ Write-Host $m -ForegroundColor Cyan }
 function Ok($m)  { Write-Host "  [OK]   $m" -ForegroundColor Green }
 function Warn($m){ Write-Host "  [WARN] $m" -ForegroundColor Yellow }
@@ -57,7 +62,7 @@ elseif ($SkipFontInstall) { Warn "$NerdFont not installed (-SkipFontInstall set)
 elseif (Get-Command winget -ErrorAction SilentlyContinue) {
     if ($PSCmdlet.ShouldProcess('Microsoft.CascadiaCode', 'winget install')) {
         Info "  installing Cascadia Code (ships the Nerd Font variant '$NerdFont')..."
-        winget install -e --id Microsoft.CascadiaCode --accept-package-agreements --accept-source-agreements --silent | Out-Null
+        winget install -e --id Microsoft.CascadiaCode --accept-package-agreements --accept-source-agreements --disable-interactivity --silent | Out-Null
         Ok "Cascadia Code install attempted (a Nerd Font may need a sign-out/in to register)"
     }
 } else { Warn "winget not found; install '$NerdFont' manually from https://www.nerdfonts.com" }
@@ -67,7 +72,7 @@ if (-not $SkipOhMyPosh) {
     elseif (Get-Command winget -ErrorAction SilentlyContinue) {
         if ($PSCmdlet.ShouldProcess('JanDeDobbeleer.OhMyPosh', 'winget install')) {
             Info "  installing Oh My Posh..."
-            winget install -e --id JanDeDobbeleer.OhMyPosh --accept-package-agreements --accept-source-agreements --silent | Out-Null
+            winget install -e --id JanDeDobbeleer.OhMyPosh --accept-package-agreements --accept-source-agreements --disable-interactivity --silent | Out-Null
             Ok "Oh My Posh install attempted (reopen the shell to get it on PATH)"
         }
     } else { Warn "winget not found; install Oh My Posh manually from https://ohmyposh.dev" }

@@ -886,8 +886,10 @@ function Install-ModulesSafely {
                 $installParams = @{
                     Name = $module.Key
                     Scope = $Scope
-                    Force = $Force
+                    Force = ($Force -or $Silent)   # force (no prompts) on any unattended/-Silent run
                     AllowClobber = $true
+                    Repository = 'PSGallery'        # pin source so there's no repo-selection prompt
+                    Confirm = $false                # never block on a confirmation prompt
                     ErrorAction = 'Stop'
                     WarningAction = 'SilentlyContinue'
                 }
@@ -913,8 +915,41 @@ function Install-ModulesSafely {
                 $results[$module.Key] = $true
 
             } catch {
-                Write-ColorOutput "  [FAILED] Error: $($_.Exception.Message)" -Color $Colors.Error
-                $results[$module.Key] = $false
+                $installError = $_.Exception.Message
+                # Fallback: the legacy PackageManagement/PowerShellGet engine sometimes fails to extract
+                # a package (e.g. "End of Central Directory record could not be found" - seen when the module
+                # path is redirected into OneDrive, or with a corrupt cached .nupkg). Retry once via the modern
+                # PSResourceGet engine, which uses a completely different download/extract path.
+                if (Get-Command Install-PSResource -ErrorAction SilentlyContinue) {
+                    Write-ColorOutput "  [RETRY] Install-Module failed ($installError)." -Color $Colors.Warning
+                    Write-ColorOutput "  [RETRY] Retrying via PSResourceGet (Install-PSResource)..." -Color $Colors.Progress
+                    try {
+                        $psrgParams = @{
+                            Name            = $module.Key
+                            Scope           = $Scope
+                            TrustRepository = $true
+                            Reinstall       = $true
+                            ErrorAction     = 'Stop'
+                            WarningAction   = 'SilentlyContinue'
+                        }
+                        if ($installParams.RequiredVersion) { $psrgParams.Version = "[$($installParams.RequiredVersion)]" }  # exact-version range
+                        Install-PSResource @psrgParams
+                        $installedModule = Get-Module -ListAvailable -Name $module.Key | Sort-Object Version -Descending | Select-Object -First 1
+                        if ($installedModule) {
+                            Write-ColorOutput "  [SUCCESS] Installed v$($installedModule.Version) via PSResourceGet" -Color $Colors.Success
+                        } else {
+                            Write-ColorOutput "  [SUCCESS] Installed via PSResourceGet" -Color $Colors.Success
+                        }
+                        $results[$module.Key] = $true
+                    } catch {
+                        Write-ColorOutput "  [FAILED] Install-Module:  $installError" -Color $Colors.Error
+                        Write-ColorOutput "  [FAILED] PSResourceGet:   $($_.Exception.Message)" -Color $Colors.Error
+                        $results[$module.Key] = $false
+                    }
+                } else {
+                    Write-ColorOutput "  [FAILED] Error: $installError" -Color $Colors.Error
+                    $results[$module.Key] = $false
+                }
             }
         }
     }
@@ -1052,6 +1087,19 @@ try {
         Write-ColorOutput "[+] PSGallery set to trusted" -Color $Colors.Success
     } else {
         Write-ColorOutput "[+] PSGallery already trusted" -Color $Colors.Success
+    }
+
+    # Ensure the NuGet package provider is present BEFORE any Install-Module call. Without it,
+    # PowerShellGet emits an interactive "install NuGet provider now? [Y/N]" prompt that hangs a
+    # -Silent / unattended run forever. Bootstrapping it up front (best-effort) makes the run safe.
+    if (-not (Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) {
+        Write-ColorOutput "Bootstrapping NuGet package provider..." -Color $Colors.Info
+        try {
+            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -ErrorAction Stop | Out-Null
+            Write-ColorOutput "[+] NuGet provider installed" -Color $Colors.Success
+        } catch {
+            Write-ColorOutput "[WARNING] Could not bootstrap NuGet provider: $($_.Exception.Message)" -Color $Colors.Warning
+        }
     }
 
     # Resolve install scope from settings (AllUsers needs elevation; fall back to CurrentUser)

@@ -32,6 +32,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# PowerShell 7.4+ defaults $PSNativeCommandUseErrorActionPreference to $true, which turns any
+# non-zero exit from a native command (winget/gh/code) into a terminating error under -Stop.
+# This script intentionally inspects $LASTEXITCODE itself (winget list returns non-zero when a
+# package isn't installed; gh auth status returns non-zero when not logged in), so opt out here.
+$PSNativeCommandUseErrorActionPreference = $false
 function Info($m){ Write-Host $m -ForegroundColor Cyan }
 function Ok($m)  { Write-Host "  [OK]   $m" -ForegroundColor Green }
 function Warn($m){ Write-Host "  [WARN] $m" -ForegroundColor Yellow }
@@ -57,13 +62,16 @@ Step "winget packages"
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     Warn "winget not found. Install 'App Installer' from the Microsoft Store, then re-run."
 } else {
+    # --accept-source-agreements + --disable-interactivity are REQUIRED on every winget call:
+    # otherwise the first query blocks forever on the interactive "msstore source agreement"
+    # prompt on machines where it hasn't been accepted yet (the 2>$null even hides the prompt).
     foreach ($p in $cfg.tooling.winget) {
         if (-not $p.enabled) { continue }
-        $installed = (winget list --id $p.id -e 2>$null) -match [Regex]::Escape($p.id)
+        $installed = (winget list --id $p.id -e --accept-source-agreements --disable-interactivity 2>$null) -match [Regex]::Escape($p.id)
         if ($installed) { Ok "$($p.id) already installed"; continue }
         if ($PSCmdlet.ShouldProcess($p.id, "winget install")) {
             Info "  installing $($p.id) - $($p.description)"
-            winget install -e --id $p.id --accept-package-agreements --accept-source-agreements --silent | Out-Null
+            winget install -e --id $p.id --accept-package-agreements --accept-source-agreements --disable-interactivity --silent | Out-Null
             if ($LASTEXITCODE -eq 0) { Ok $p.id } else { Warn "$($p.id) exit $LASTEXITCODE" }
         }
     }
@@ -92,7 +100,15 @@ if ($cfg.environment.powershell.psGalleryTrust -and (Get-PSRepository -Name PSGa
 } else { Ok "PSGallery already trusted (or skipped)" }
 $ep = $cfg.environment.powershell.executionPolicy
 if ($ep -and $PSCmdlet.ShouldProcess("ExecutionPolicy=$ep (CurrentUser)",'Set')) {
-    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy $ep -Force; Ok "ExecutionPolicy = $ep (CurrentUser)"
+    # On WDAC/AppLocker-locked-down machines (ConstrainedLanguage mode) Set-ExecutionPolicy throws a
+    # SecurityException even when the effective policy is already permissive. Treat it as best-effort:
+    # warn and continue rather than aborting the whole bootstrap over a non-essential step.
+    try {
+        Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy $ep -Force -ErrorAction Stop
+        Ok "ExecutionPolicy = $ep (CurrentUser)"
+    } catch {
+        Warn "Could not set execution policy (effective '$(Get-ExecutionPolicy)'; likely managed by Group Policy / WDAC lockdown). Continuing."
+    }
 }
 
 # --- 4. environment: git ---
